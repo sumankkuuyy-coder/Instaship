@@ -1,941 +1,396 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>InstaShip Fulfillment - Merchant Operations</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VSM Advance Task Portal</title>
     <style>
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --success: #00b09b;
+            --bg-gradient: linear-gradient(135deg, #4e54c8, #8f94fb);
+            --text-main: #333333;
+            --text-muted: #666666;
+        }
         body {
-            overscroll-behavior-y: none;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background-color: #f8fafc;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(to right, #ece9e6, #ffffff);
+            margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .app-container {
+            width: 100%; max-width: 440px; background: #ffffff; min-height: 100vh;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column;
+            box-sizing: border-box; position: relative; overflow-x: hidden;
+        }
+        @media(min-width: 450px) {
+            .app-container { height: 900px; border-radius: 30px; border: 8px solid #333; }
+        }
+        .top-clock-bar {
+            background: var(--bg-gradient); color: white; padding: 10px 15px; text-align: center;
+            font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+        }
+        .content-area { padding: 20px; flex: 1; overflow-y: auto; }
+        .hidden { display: none !important; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 13px; font-weight: 600; }
+        input {
+            width: 100%; padding: 14px; border: 2px solid #e1e1e1; border-radius: 12px;
+            box-sizing: border-box; font-size: 15px; transition: all 0.3s ease;
+        }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 8px rgba(78, 84, 200, 0.2); }
+        button {
+            width: 100%; padding: 14px; background: var(--bg-gradient); color: white; border: none;
+            border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(78, 84, 200, 0.3);
+        }
+        .dash-header {
+            display: flex; justify-content: space-between; align-items: center; background: #f8f9fe;
+            padding: 15px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #eef2f7;
+        }
+        .wallet-badge {
+            background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 10px 16px;
+            border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 15px;
+        }
+        .order-card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 16px;
+        }
+        .stages-row { display: flex; justify-content: space-between; margin: 14px 0; font-size: 12px; text-align: center; }
+        .stage-node span { font-size: 18px; display: block; margin-bottom: 2px; }
+        .modal {
+            position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal-card {
+            background: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
+        }
+        .profile-container { text-align: center; margin-bottom: 15px; }
+        .profile-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); cursor: pointer; }
+        .id-badge-box { background: #f0f3ff; border: 1px dashed var(--primary); padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; text-align: left; }
+        .id-badge-box div { margin-bottom: 4px; }
+        .bank-status-box { padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 13px; font-weight: bold; text-align: center; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-verified { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
         
-        @keyframes spin-right { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes spin-left { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
-
-        .multi-ring-loader {
-            position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;
+        .salary-notice {
+            background: #eef2ff; border-left: 4px solid var(--primary); padding: 12px;
+            font-size: 12px; color: #333; margin-top: 15px; border-radius: 6px; line-height: 1.5;
         }
-        .multi-ring-loader div {
-            position: absolute; border-radius: 50%; border: 3px solid transparent;
-        }
-        .multi-ring-loader div:nth-child(odd) { animation: spin-right 2s infinite linear; }
-        .multi-ring-loader div:nth-child(even) { animation: spin-left 2.5s infinite linear; }
-
-        .multi-ring-loader div:nth-child(1)  { width: 20px; height: 20px; border-top-color: #0284c7; }
-        .multi-ring-loader div:nth-child(2)  { width: 28px; height: 28px; border-right-color: #0ea5e9; }
-        .multi-ring-loader div:nth-child(3)  { width: 36px; height: 36px; border-bottom-color: #38bdf8; }
-        .multi-ring-loader div:nth-child(4)  { width: 44px; height: 44px; border-left-color: #6366f1; }
-        .multi-ring-loader div:nth-child(5)  { width: 52px; height: 52px; border-top-color: #8b5cf6; }
-        .multi-ring-loader div:nth-child(6)  { width: 60px; height: 60px; border-right-color: #a855f7; }
-
-        .blur-data {
-            filter: blur(5px);
-            transition: filter 0.3s ease;
-        }
-
-        @keyframes slideInFromTop {
-            0% { opacity: 0; transform: translateY(-15px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        .order-card-anim {
-            animation: slideInFromTop 0.3s ease-out forwards;
-        }
-
-        .iphone-key-white {
-            background-color: #ffffff; border-radius: 50%; width: 64px; height: 64px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #1f2937; font-size: 24px; font-weight: 500; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); user-select: none;
-        }
-        .iphone-key-white:active { background-color: #e5e7eb; }
-        .iphone-key-white span {
-            font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-top: -2px; color: #6b7280;
-        }
+        .error-msg { color: #e53e3e; font-size: 13px; text-align: center; margin-top: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- 1. SPLASH SCREEN -->
-    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0f172a; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease;">
-        <div class="multi-ring-loader" style="margin-bottom: 24px;">
-            <div></div><div></div><div></div><div></div><div></div><div></div>
+<div class="app-container">
+    <div class="top-clock-bar" id="realTimeClock">Connecting Time...</div>
+
+    <div class="content-area">
+        <!-- STEP 1: MOBILE -->
+        <div id="step-mobile">
+            <h2 style="text-align:center; color: var(--primary); margin-bottom: 25px;">VSM Portal</h2>
+            <div class="input-group">
+                <label>Mobile Number</label>
+                <input type="tel" id="mobileInput" maxlength="10" placeholder="Enter 10-digit mobile number">
+            </div>
+            <button onclick="checkMobileNumber()">Continue</button>
+            <div id="mobError" class="error-msg"></div>
         </div>
-        <h2 style="color: white; font-weight: bold; letter-spacing: 1px; font-size: 18px;">InstaShip Fulfillment Hub...</h2>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 6px;">Secure Merchant Gateway</p>
-    </div>
 
-    <!-- WALLET MODAL -->
-    <div id="wallet-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 16px;">
-        <div style="background: white; width: 100%; max-width: 360px; border-radius: 20px; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 36px; height: 36px; background: #e0f2fe; color: #0284c7; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px;">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                    <h3 style="font-size: 16px; font-weight: bold; color: #1e293b; margin: 0;">My Wallet</h3>
-                </div>
-                <button onclick="closeWalletModal()" style="background: none; border: none; font-size: 18px; color: #64748b; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+        <!-- STEP 2: REGISTER -->
+        <div id="step-register" class="hidden">
+            <h3 style="color: var(--primary);">New Account Registration</h3>
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="nameInput" placeholder="Enter your full name">
             </div>
-
-            <!-- Total Available Balance Box -->
-            <div style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 16px; border-radius: 14px; text-align: center;">
-                <span style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Total Available Balance</span>
-                <h2 id="wallet-modal-balance" style="font-size: 28px; font-weight: bold; margin: 6px 0 0 0;">₹0.00</h2>
+            <div class="input-group">
+                <label>Create 6-Digit PIN</label>
+                <input type="password" id="pinReg" maxlength="6" placeholder="Enter 6-digit security PIN">
             </div>
-
-            <!-- Bank Details Section -->
-            <div id="bank-section" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-                <!-- Dynamically filled -->
-            </div>
-
-            <p style="font-size: 11px; color: #64748b; text-align: center; margin: 0; line-height: 1.4;">
-                Payouts will be automatically transferred to your linked bank account every 7 days.
-            </p>
-
-            <button onclick="closeWalletModal()" style="width: 100%; padding: 12px; background-color: #0284c7; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer;">Close</button>
+            <button onclick="registerNewUser()">Register Now</button>
+            <div id="regError" class="error-msg"></div>
         </div>
-    </div>
 
-    <!-- TALK.TO SUPPORT CHAT MODAL -->
-    <div id="support-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 12px;">
-        <div style="background: white; width: 100%; max-width: 420px; height: 85vh; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
-            
-            <!-- Modal Header -->
-            <div style="background: #0f172a; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 32px; height: 32px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: white;">
-                        <i class="fa-solid fa-headset"></i>
-                    </div>
-                    <div>
-                        <h4 style="font-size: 14px; font-weight: bold; margin: 0;">Staff Support Chat</h4>
-                        <span style="font-size: 10px; color: #4ade80;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Online Assistance</span>
-                    </div>
-                </div>
-                <button onclick="closeSupportModal()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+        <!-- STEP 3: LOGIN -->
+        <div id="step-login" class="hidden">
+            <h3 style="color: var(--primary);">Welcome Back!</h3>
+            <div class="input-group">
+                <label>Enter 6-Digit PIN</label>
+                <input type="password" id="pinLogin" maxlength="6" placeholder="Enter 6-digit PIN">
             </div>
-
-            <!-- Tawk.to Chat Iframe / Container -->
-            <div style="flex: 1; background: #f8fafc; position: relative; overflow: hidden;" id="tawkto-container">
-                <iframe src="https://embed.tawk.to/YOUR_PROPERTY_ID/default" style="width: 100%; height: 100%; border: none;" title="Support Chat"></iframe>
-            </div>
-
+            <button onclick="loginExistingUser()">Login Securely</button>
+            <div id="loginError" class="error-msg"></div>
         </div>
-    </div>
 
-    <!-- ADD/EDIT BANK MODAL -->
-    <div id="bank-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 100000; display: none; align-items: center; justify-content: center; padding: 16px;">
-        <div style="background: white; width: 100%; max-width: 360px; border-radius: 20px; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 14px;">
-            <h3 style="font-size: 16px; font-weight: bold; color: #1e293b; margin: 0;">Add Bank Account</h3>
-            
-            <div>
-                <label style="font-size: 12px; font-weight: 600; color: #4b5563; display: block; margin-bottom: 4px;">Account Holder Name</label>
-                <input type="text" id="bank-holder" placeholder="Enter name as per bank" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-size: 12px; font-weight: 600; color: #4b5563; display: block; margin-bottom: 4px;">Account Number</label>
-                <input type="text" id="bank-acc" placeholder="Enter account number" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-size: 12px; font-weight: 600; color: #4b5563; display: block; margin-bottom: 4px;">IFSC Code</label>
-                <input type="text" id="bank-ifsc" placeholder="Enter IFSC code" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; box-sizing: border-box; text-transform: uppercase;">
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 6px;">
-                <button onclick="closeBankModal()" style="flex: 1; padding: 10px; background-color: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Cancel</button>
-                <button onclick="saveBankAccount()" style="flex: 1; padding: 10px; background-color: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Save Bank</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PREVIEW MODAL -->
-    <div id="preview-popup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 16px;">
-        <div style="background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 18px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 92vh; overflow-y: auto;">
-            
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <div id="prev-icon-box" style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
-                    <i id="prev-icon" class="fa-solid fa-truck"></i>
-                </div>
+        <!-- STEP 4: DASHBOARD -->
+        <div id="step-dashboard" class="hidden">
+            <div class="dash-header">
                 <div>
-                    <h4 id="prev-title" style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 0;">Operation Preview</h4>
-                    <span id="prev-subtitle" style="font-size: 11px; color: #64748b;">Verify details before submitting</span>
+                    <small style="color: var(--text-muted);">Welcome back,</small><br>
+                    <strong id="dashName" style="font-size: 16px; color: var(--text-main);">User</strong>
+                </div>
+                <div class="wallet-badge" onclick="openWalletModal()">
+                     <span id="walletDisplay">0.00</span>
                 </div>
             </div>
 
-            <!-- REAL 8-STAGE STEP-BY-STEP MAP -->
-            <div style="background: #f1f5f9; border-radius: 12px; padding: 10px; margin-bottom: 12px;">
-                <span style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">Order Lifecycle (8 Stages)</span>
-                <div style="display: flex; flex-direction: column; gap: 6px;" id="stages-container"></div>
-            </div>
-
-            <!-- DETAILS BOX -->
-            <div id="prev-details-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: #334155;"></div>
-
-            <div style="display: flex; gap: 10px;">
-                <button onclick="closePreviewPopup()" style="flex: 1; padding: 12px; background-color: #f1f5f9; color: #475569; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer;">Cancel</button>
-                <button onclick="confirmAndExecuteOrder()" style="flex: 1; padding: 12px; background-color: #16a34a; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer;">Confirm & OK</button>
-            </div>
+            <h4 style="margin: 0 0 15px 0; color: #444;">Live E-Commerce Operations</h4>
+            <div id="orderContainer"></div>
         </div>
     </div>
+</div>
 
-    <!-- GENERAL SUCCESS/ERROR MODAL -->
-    <div id="general-popup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: white; width: 100%; max-width: 320px; border-radius: 20px; padding: 30px 20px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-            <div id="popup-icon-box" style="width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px auto;">
-                <i id="popup-icon" class="fa-solid fa-circle-check"></i>
-            </div>
-            <h3 id="popup-title" style="font-size: 20px; font-weight: bold; color: #1f2937; margin: 0 0 8px 0;">Successful!</h3>
-            <p id="popup-message" style="font-size: 14px; color: #6b7280; margin: 0 0 24px 0;">Action completed successfully.</p>
-            <button onclick="closeGeneralPopup()" style="width: 100%; padding: 12px; background-color: #0284c7; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer;">OK</button>
+<!-- WALLET & PROFILE MODAL -->
+<div id="walletModal" class="modal hidden">
+    <div class="modal-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0; color:var(--primary);">Profile & Wallet</h3>
+            <span onclick="closeWalletModal()" style="font-size:22px; cursor:pointer; font-weight:bold; color:#aaa;">&times;</span>
+        </div>
+
+        <div class="profile-container">
+            <img id="profilePreview" src="https://via.placeholder.com/80" class="profile-img" onclick="document.getElementById('fileInput').click()" title="Change Photo">
+            <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="uploadPhoto(event)">
+            <div style="font-size: 11px; color: var(--text-muted); margin-top:4px;">Tap image to change photo</div>
+        </div>
+
+        <div class="id-badge-box">
+            <div> <b>Unique ID:</b> <span id="modalUniqueId">---</span></div>
+            <div> <b>ID Status:</b> <span style="color: green; font-weight: bold;">Active</span></div>
+            <div> <b>Active Date:</b> <span id="modalActiveDate">---</span></div>
+            <div> <b>Payout Date (Every 7 Days):</b> <span id="modalPayoutDate" style="color: #d97706; font-weight: bold;">---</span></div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px; font-weight: 600; color: var(--primary);">
+            Synced Balance: <span id="modalBalance">0.00</span>
+        </div>
+
+        <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
+
+        <div id="bankSectionContent"></div>
+
+        <div class="salary-notice" id="salaryNoticeText">
+            Your fixed salary and weekly payout of <span id="noticeBalance">0.00</span> will be automatically credited to this verified account every 7 days on <b><span id="noticePayoutDate">---</span></b>.
         </div>
     </div>
+</div>
 
-    <!-- 2. REGISTRATION FLOW -->
-    <div id="reg-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 5000; display: none; flex-direction: column; padding: 24px; box-sizing: border-box; overflow-y: auto;">
+<script>
+    const API_URL = "https://withered-band-a9c5.sumankkuuyy.workers.dev";
+    let currentUser = null;
+    let localWallet = 0.0;
+
+    setInterval(() => {
+        const opts = { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'medium' };
+        document.getElementById("realTimeClock").innerText = " " + new Date().toLocaleString('en-IN', opts);
+    }, 1000);
+
+    const brands = ["Nike", "Samsung", "boAt", "Puma", "Zara", "OnePlus", "Adidas", "Fastrack"];
+    const products = ["Smart Watch", "Running Shoes", "Wireless Earbuds", "Backpack", "Cotton T-Shirt", "Bluetooth Speaker"];
+    const stages = [{icon:"", name:"Ordered"}, {icon:"", name:"Packed"}, {icon:"", name:"Shipped"}, {icon:"", name:"Transit"}, {icon:"", name:"Out for Delivery"}, {icon:"", name:"Delivered"}];
+    const cities = ["Mumbai - 400001", "Delhi - 110001", "Patna - 800001", "Bangalore - 560001", "Kolkata - 700001"];
+
+    function generateRandomOrder(i) {
+        return {
+            id: 88400 + i,
+            title: `${brands[i % brands.length]} ${products[i % products.length]}`,
+            price: (Math.random() * 2500 + 350).toFixed(2),
+            location: cities[i % cities.length],
+            stageIdx: i % 5
+        };
+    }
+
+    async function checkMobileNumber() {
+        const mobile = document.getElementById("mobileInput").value.trim();
+        if (mobile.length !== 10) { document.getElementById("mobError").innerText = "Enter valid 10-digit number"; return; }
         
-        <div id="reg-step-1" style="display: flex; flex-direction: column; justify-content: center; flex: 1; max-width: 400px; margin: 0 auto; width: 100%;">
-            <div style="text-align: center; margin-bottom: 32px;">
-                <div style="width: 64px; height: 64px; background-color: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px auto;">
-                    <i class="fa-solid fa-box-open"></i>
-                </div>
-                <h2 style="font-size: 24px; font-weight: bold; color: #1f2937; margin: 0;">Staff Verification</h2>
-                <p style="font-size: 14px; color: #6b7280; margin-top: 4px;">InstaShip Logistics Partner Portal</p>
-            </div>
+        let res = await fetch(`${API_URL}/api/check-user`, {
+            method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ mobile })
+        });
+        let data = await res.json();
+        currentUser = { mobile };
 
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <div>
-                    <label style="font-size: 12px; font-weight: 600; color: #4b5563; display: block; margin-bottom: 6px;">Full Name</label>
-                    <input type="text" id="reg-name" placeholder="Enter your full name" style="width: 100%; padding: 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box;">
-                </div>
-                <div>
-                    <label style="font-size: 12px; font-weight: 600; color: #4b5563; display: block; margin-bottom: 6px;">Mobile Number</label>
-                    <input type="tel" id="reg-mobile" placeholder="Enter mobile number" style="width: 100%; padding: 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box;">
-                </div>
-                <button onclick="goToRegStep2()" style="width: 100%; padding: 14px; background-color: #0284c7; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; margin-top: 12px;">Next</button>
-            </div>
-        </div>
+        document.getElementById("step-mobile").classList.add("hidden");
+        if (data.exists) {
+            document.getElementById("step-login").classList.remove("hidden");
+        } else {
+            document.getElementById("step-register").classList.remove("hidden");
+        }
+    }
 
-        <div id="reg-step-2" style="display: none; flex-direction: column; justify-content: center; flex: 1; max-width: 400px; margin: 0 auto; width: 100%;">
-            <div style="text-align: center; margin-bottom: 32px;">
-                <h2 style="font-size: 24px; font-weight: bold; color: #1f2937; margin: 0;">Security PIN</h2>
-                <p style="font-size: 14px; color: #6b7280; margin-top: 4px;">Set your 6-digit Portal Access PIN</p>
-            </div>
+    async function registerNewUser() {
+        const name = document.getElementById("nameInput").value.trim();
+        const pin = document.getElementById("pinReg").value.trim();
+        if (!name || pin.length !== 6) { document.getElementById("regError").innerText = "Enter name & 6-digit PIN"; return; }
 
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <div>
-                    <label style="font-size: 12px; font-weight: 600; color: #4b5563; display: block; margin-bottom: 6px;">Set 6 Digit PIN</label>
-                    <input type="text" id="reg-pin" maxlength="6" readonly onclick="openKeyboard('pin')" placeholder="Enter 6-digit PIN" style="width: 100%; padding: 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 16px; letter-spacing: 4px; text-align: center; background-color: #f9fafb; cursor: pointer; outline: none;">
+        let res = await fetch(`${API_URL}/api/auth`, {
+            method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ mobile: currentUser.mobile, name, pin, isNew: true })
+        });
+        let data = await res.json();
+        if (data.success) {
+            currentUser = data.user;
+            localWallet = currentUser.wallet_balance || 0.0;
+            launchDashboard();
+        }
+    }
+
+    async function loginExistingUser() {
+        const pin = document.getElementById("pinLogin").value.trim();
+        if (pin.length !== 6) { document.getElementById("loginError").innerText = "Enter 6-digit PIN"; return; }
+
+        let res = await fetch(`${API_URL}/api/auth`, {
+            method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ mobile: currentUser.mobile, pin, isNew: false })
+        });
+        let data = await res.json();
+        if (data.success) {
+            currentUser = data.user;
+            localWallet = currentUser.wallet_balance || 0.0;
+            launchDashboard();
+        } else {
+            document.getElementById("loginError").innerText = data.message;
+        }
+    }
+
+    function launchDashboard() {
+        document.querySelectorAll('.content-area > div').forEach(d => d.classList.add("hidden"));
+        document.getElementById("step-dashboard").classList.remove("hidden");
+        document.getElementById("dashName").innerText = currentUser.name;
+        document.getElementById("walletDisplay").innerText = localWallet.toFixed(2);
+        loadOrdersList();
+    }
+
+    function loadOrdersList() {
+        const container = document.getElementById("orderContainer");
+        container.innerHTML = "";
+        for (let i = 0; i < 4; i++) {
+            let ord = generateRandomOrder(Math.floor(Math.random() * 5000));
+            let card = document.createElement("div");
+            card.className = "order-card";
+            card.innerHTML = `
+                <div style="font-weight:bold; color:var(--text-main);">#${ord.id} - ${ord.title}</div>
+                <div style="font-size:13px; color:var(--text-muted); margin-top:2px;">Price: ${ord.price} |  ${ord.location}</div>
+                <div class="stages-row">
+                    ${stages.slice(0, 6).map((st, idx) => `
+                        <div class="stage-node">
+                            <span>${st.icon}</span>
+                            <small>${idx <= ord.stageIdx ? '' : ''}</small>
+                        </div>
+                    `).join('')}
                 </div>
-                <div>
-                    <label style="font-size: 12px; font-weight: 600; color: #4b5563; display: block; margin-bottom: 6px;">Confirm 6 Digit PIN</label>
-                    <input type="text" id="reg-conf-pin" maxlength="6" readonly onclick="openKeyboard('conf')" placeholder="Confirm 6-digit PIN" style="width: 100%; padding: 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 16px; letter-spacing: 4px; text-align: center; background-color: #f9fafb; cursor: pointer; outline: none;">
-                </div>
-                <div style="display: flex; gap: 12px; margin-top: 12px;">
-                    <button onclick="backToRegStep1()" style="width: 40%; padding: 14px; background-color: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer;">Back</button>
-                    <button onclick="completeRegistration()" style="width: 60%; padding: 14px; background-color: #16a34a; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer;">Register</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                <button onclick="processOrderReward(this, 0.65)" style="padding:10px; font-size:14px; margin-top:5px;">Confirm Order & Review</button>
+            `;
+            container.appendChild(card);
+        }
+    }
 
-    <!-- 3. LOGIN FLOW -->
-    <div id="login-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f8fafc; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box;">
-        <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; margin-bottom: 16px; border: 3px solid #0284c7; background: #e0f2fe; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #0284c7;">
-            <i class="fa-solid fa-user-tie"></i>
-        </div>
-        <h2 id="login-user-name" style="font-size: 20px; font-weight: bold; color: #1f2937; margin: 0 0 4px 0;">Welcome Back</h2>
-        <p style="font-size: 14px; color: #6b7280; margin: 0 0 24px 0;">Enter your 6-digit PIN to access dashboard</p>
+    function processOrderReward(btn, reward) {
+        btn.innerText = "Processing Review...";
+        setTimeout(() => {
+            btn.innerText = "Final Confirm";
+            btn.onclick = function() {
+                localWallet += reward;
+                document.getElementById("walletDisplay").innerText = localWallet.toFixed(2);
+                btn.parentElement.innerHTML = "<b style='color:var(--success);'> Task Completed (+0.65 Credited)</b>";
+            };
+        }, 800);
+    }
 
-        <div style="display: flex; gap: 12px; margin-bottom: 30px;" onclick="openKeyboard('login')">
-            <div class="login-dot" id="ldot-0" style="width: 14px; height: 14px; border: 2px solid #0284c7; border-radius: 50%;"></div>
-            <div class="login-dot" id="ldot-1" style="width: 14px; height: 14px; border: 2px solid #0284c7; border-radius: 50%;"></div>
-            <div class="login-dot" id="ldot-2" style="width: 14px; height: 14px; border: 2px solid #0284c7; border-radius: 50%;"></div>
-            <div class="login-dot" id="ldot-3" style="width: 14px; height: 14px; border: 2px solid #0284c7; border-radius: 50%;"></div>
-            <div class="login-dot" id="ldot-4" style="width: 14px; height: 14px; border: 2px solid #0284c7; border-radius: 50%;"></div>
-            <div class="login-dot" id="ldot-5" style="width: 14px; height: 14px; border: 2px solid #0284c7; border-radius: 50%;"></div>
-        </div>
-        <button onclick="openKeyboard('login')" style="padding: 12px 24px; background-color: #0284c7; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 15px;">Open Keypad</button>
-        <button onclick="resetAppStorage()" style="margin-top: 20px; background: none; border: none; color: #dc2626; font-size: 13px; cursor: pointer; text-decoration: underline;">Reset / New Registration</button>
-    </div>
-
-    <!-- 4. CUSTOM KEYBOARD OVERLAY -->
-    <div id="iphone-keyboard" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); z-index: 6000; display: none; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 24px;">
+    async function openWalletModal() {
+        document.getElementById("walletModal").classList.remove("hidden");
+        document.getElementById("modalBalance").innerText = localWallet.toFixed(2);
         
-        <div style="margin-bottom: 16px; display: flex; flex-direction: column; align-items: center;">
-            <div style="font-size: 12px; color: #e5e7eb; margin-bottom: 6px; font-weight: 500;">Entering PIN</div>
-            <div id="keyboard-preview-box" style="background-color: white; width: 180px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; letter-spacing: 6px; color: #1f2937; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid #d1d5db;"></div>
-        </div>
-
-        <div style="width: 100%; display: flex; justify-content: flex-end; padding: 0 24px 12px 24px;">
-            <button onclick="closeKeyboardOverlay()" style="background: none; border: none; color: white; font-size: 16px; font-weight: 600; cursor: pointer;">Done</button>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 12px; width: 260px;">
-            <div style="display: flex; justify-content: space-between;">
-                <div class="iphone-key-white" onclick="pressKey('1')">1</div>
-                <div class="iphone-key-white" onclick="pressKey('2')">2<span>ABC</span></div>
-                <div class="iphone-key-white" onclick="pressKey('3')">3<span>DEF</span></div>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <div class="iphone-key-white" onclick="pressKey('4')">4<span>GHI</span></div>
-                <div class="iphone-key-white" onclick="pressKey('5')">5<span>JKL</span></div>
-                <div class="iphone-key-white" onclick="pressKey('6')">6<span>MNO</span></div>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <div class="iphone-key-white" onclick="pressKey('7')">7<span>PQRS</span></div>
-                <div class="iphone-key-white" onclick="pressKey('8')">8<span>TUV</span></div>
-                <div class="iphone-key-white" onclick="pressKey('9')">9<span>WXYZ</span></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="width: 64px;"></div>
-                <div class="iphone-key-white" onclick="pressKey('0')">0</div>
-                <div style="width: 64px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 50%; height: 64px;" onclick="deleteKey()">
-                    <i class="fa-solid fa-delete-left" style="color: white; font-size: 22px;"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 5. MAIN PORTAL -->
-    <div id="main-app-wrapper" style="display: none; flex-direction: column; width: 100%; height: 100%;">
+        document.getElementById("modalUniqueId").innerText = currentUser.unique_id || "VSM-98421";
+        document.getElementById("modalActiveDate").innerText = currentUser.active_date || new Date().toLocaleDateString('en-IN');
         
-        <!-- HEADER -->
-        <header style="background-color: #0f172a; color: white; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="background: #0284c7; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px;">
-                    <i class="fa-solid fa-truck-fast"></i>
-                </div>
-                <div>
-                    <h1 style="font-size: 15px; font-weight: bold; margin: 0; line-height: 1.2;">InstaShip Hub</h1>
-                    <span style="font-size: 10px; color: #94a3b8;">Merchant ID: #VSM-8821</span>
-                </div>
-            </div>
-            
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <!-- Support Chat Icon (Talk.to) -->
-                <div onclick="openSupportModal()" style="width: 36px; height: 36px; background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(74, 222, 128, 0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Customer Support Chat">
-                    <i class="fa-solid fa-headset" style="color: #4ade80; font-size: 16px;"></i>
-                </div>
+        const payoutDateStr = currentUser.payout_date || "After 7 Days";
+        document.getElementById("modalPayoutDate").innerText = payoutDateStr;
+        document.getElementById("noticePayoutDate").innerText = payoutDateStr;
+        document.getElementById("noticeBalance").innerText = localWallet.toFixed(2);
 
-                <!-- WALLET ICON & LIVE EARNING BADGE -->
-                <div onclick="openWalletModal()" style="display: flex; align-items: center; gap: 8px; background: rgba(2, 132, 199, 0.2); border: 1px solid rgba(56, 189, 248, 0.3); padding: 5px 12px; border-radius: 20px; cursor: pointer;">
-                    <i class="fa-solid fa-wallet" style="color: #38bdf8; font-size: 14px;"></i>
-                    <div style="text-align: right;">
-                        <span style="font-size: 9px; color: #94a3b8; display: block; line-height: 1;">Wallet Earning</span>
-                        <span id="payout-badge" style="font-size: 12px; color: #38bdf8; font-weight: bold; display: block; line-height: 1.1;">₹0.00</span>
-                    </div>
-                </div>
-            </div>
-        </header>
+        if (currentUser.profile_photo) {
+            document.getElementById("profilePreview").src = currentUser.profile_photo;
+        }
 
-        <!-- MAIN CONTENT -->
-        <main class="no-scrollbar" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px;">
-            
-            <!-- PROGRESS CARD -->
-            <div style="background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-size: 14px; font-weight: 600; color: #334155;">Task Operations Completed</span>
-                    <span id="counter-text" style="font-size: 14px; font-weight: bold; color: #0284c7;">0 Tasks</span>
-                </div>
-                <div style="width: 100%; height: 10px; background-color: #f1f5f9; border-radius: 5px; overflow: hidden; margin-bottom: 14px;">
-                    <div id="progress-bar" style="width: 0%; height: 100%; background-color: #0284c7; transition: width 0.3s ease;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                    <span style="font-size: 13px; color: #64748b; font-weight: 500;">Rate per Task:</span>
-                    <span style="font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 6px; background-color: #dcfce7; color: #16a34a;">₹0.75 / Task</span>
-                </div>
-            </div>
-
-            <!-- ORDERS QUEUE -->
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
-                    <h3 style="font-size: 14px; font-weight: bold; color: #1e293b; margin: 0;">Live Operations Queue</h3>
-                    <span style="font-size: 11px; color: #0284c7; background: #e0f2fe; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Active (6 Cards)</span>
-                </div>
-
-                <div id="orders-queue-list" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 24px;"></div>
-            </div>
-        </main>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        let activeInputType = ""; 
-        let regPinValue = "";
-        let regConfPinValue = "";
-        let loginPinValue = "";
-        let completedTaskCount = 0;
-        const ratePerTask = 0.75; 
-        let queueOrders = [];
-        let selectedOrderForPreview = null;
-        let savedBankAccount = null;
-
-        const brandCatalog = [
-            { name: "Amazon India", icon: "fa-brands fa-amazon", color: "#f97316", bg: "#fff8ec", products: ["Echo Dot Smart Speaker", "Fire TV Stick 4K", "Kindle Paperwhite", "20W Fast Power Bank", "Wireless Noise Headphones", "Mechanical Gaming Keyboard"] },
-            { name: "Flipkart", icon: "fa-solid fa-bag-shopping", color: "#2563eb", bg: "#eff6ff", products: ["Bluetooth Smartwatch", "Stainless Steel Water Bottle", "Hair Trimmer for Men", "LED Ring Light", "Foldable Laptop Stand", "Smart LED Bulb"] },
-            { name: "Myntra", icon: "fa-solid fa-shirt", color: "#e11d48", bg: "#fff1f2", products: ["Cotton Oversized T-Shirt", "Leather Wallet", "Stretchable Denim Jeans", "Analog Stainless Watch", "Running Sports Shoes", "Printed Casual Kurta"] },
-            { name: "Blinkit", icon: "fa-solid fa-bolt", color: "#ca8a04", bg: "#fefce8", products: ["Fresh Organic Milk 1L", "Aashirvaad Atta 5kg", "Tata Salt 1kg", "Cadbury Silk Chocolate", "Lay's Classic Chips", "Bru Instant Coffee"] },
-            { name: "Meesho", icon: "fa-solid fa-shop", color: "#db2777", bg: "#fff1f2", products: ["Ceramic Coffee Mug Set", "Party Wear Georgette Saree", "Non-Stick Aluminium Fry Pan", "LED String Fairy Lights", "Cotton Double Bedsheet", "Plastic Storage Organizer"] },
-            { name: "Zepto", icon: "fa-solid fa-stopwatch", color: "#7c3aed", bg: "#f3e8ff", products: ["Fresh Alphonso Mangoes", "Amul Pure Butter 500g", "Sunflower Oil 1L", "Colgate Toothpaste", "Surf Excel Detergent", "Mosquito Repellent Refill"] },
-            { name: "JioMart", icon: "fa-solid fa-store", color: "#2563eb", bg: "#eff6ff", products: ["Madhur Pure Sugar 5kg", "Tata Sampann Toor Dal", "Surf Excel Matic Liquid", "Lizol Surface Cleaner", "Real Mixed Fruit Juice", "Dettol Antiseptic Soap"] },
-            { name: "Delhivery", icon: "fa-solid fa-truck-fast", color: "#dc2626", bg: "#ffe4e6", products: ["Heavy Duty Shipping Boxes", "Fragile Warning Tape", "Stretch Wrapping Film", "Courier Plastic Bags", "Digital Postal Scale", "Barcode Label Rolls"] },
-            { name: "Ajio", icon: "fa-solid fa-tags", color: "#1e293b", bg: "#fdf4ff", products: ["Slim Fit Casual Shirt", "Women Embroidered Kurti", "Running Sneakers", "Canvas Sling Bag", "Metal Dial Watch", "Cotton Track Pants"] },
-            { name: "Nykaa", icon: "fa-solid fa-wand-magic-sparkles", color: "#db2777", bg: "#fff1f2", products: ["Matte Liquid Lipstick", "Long Lasting Eyeliner", "Hydrating Face Sheet Mask", "Herbal Anti-Hairfall Shampoo", "Vitamin C Face Serum", "Professional Makeup Brush Set"] },
-            { name: "Tata CliQ", icon: "fa-solid fa-cube", color: "#0f172a", bg: "#f8fafc", products: ["Wireless Earbuds TWS", "Fastrack Smartwatch", "Designer Wall Clock", "Puma Sports Backpack", "Stainless Steel Kettle", "Bluetooth Soundbar"] },
-            { name: "Swiggy Instamart", icon: "fa-solid fa-basket-shopping", color: "#ea580c", bg: "#fff7ed", products: ["Fresh Green Coconuts", "Nestle Milkmaid Tin", "Quaker Oats 1kg", "Kellogg's Corn Flakes", "Britannia Good Day Biscuits", "Kissan Mixed Fruit Jam"] },
-            { name: "BigBasket", icon: "fa-solid fa-carrot", color: "#16a34a", bg: "#f0fdf4", products: ["Fresho Organic Tomatoes 1kg", "Fortune Besan Flour 1kg", "Saffola Gold Cooking Oil", "Tata Tea Gold 500g", "Madhur Honey Squeezy", "Brooke Bond Red Label Tea"] },
-            { name: "Dunzo", icon: "fa-solid fa-bicycle", color: "#059669", bg: "#f0fdfa", products: ["Emergency Medicine Kit", "Fresh Bakery Bread", "Fresh Lemon Grass Bunch", "Daily Newspaper Pack", "Cold Coffee Glass Bottle", "Salted Butter Popcorn"] },
-            { name: "Croma", icon: "fa-solid fa-laptop", color: "#0284c7", bg: "#f1f5f9", products: ["USB Type-C Fast Cable", "Wireless Optical Mouse", "Portable Bluetooth Speaker", "Ergonomic Laptop Sleeve", "In-Ear Wired Earphones", "Tempered Glass Screen Guard"] }
-        ];
-
-        const actionTypes = [
-            { label: "Dispatch Order", stepIndex: 5, color: "#0284c7", bg: "#e0f2fe", icon: "fa-truck-fast" },
-            { label: "Out for Delivery", stepIndex: 6, color: "#9333ea", bg: "#f3e8ff", icon: "fa-motorcycle" },
-            { label: "Packed & Ready", stepIndex: 3, color: "#0d9488", bg: "#ccfbf1", icon: "fa-box" },
-            { label: "In Transit", stepIndex: 5, color: "#d97706", bg: "#fef3c7", icon: "fa-route" },
-            { label: "Quality Check Pass", stepIndex: 2, color: "#16a34a", bg: "#dcfce7", icon: "fa-clipboard-check" },
-            { label: "Warehouse Scan", stepIndex: 4, color: "#4f46e5", bg: "#e0e7ff", icon: "fa-barcode" },
-            { label: "Hub Transfer", stepIndex: 4, color: "#2563eb", bg: "#dbeafe", icon: "fa-arrows-split-up-and-left" },
-            { label: "Customs Clearance", stepIndex: 3, color: "#7c3aed", bg: "#ede9fe", icon: "fa-shield-halved" },
-            { label: "Label Printed", stepIndex: 3, color: "#475569", bg: "#f1f5f9", icon: "fa-print" },
-            { label: "Return to Origin", stepIndex: 7, color: "#dc2626", bg: "#fee2e2", icon: "fa-rotate-left" }
-        ];
-
-        const logisticsStages = [
-            { title: "Order Placed", icon: "fa-cart-shopping" },
-            { title: "Seller Verified", icon: "fa-user-check" },
-            { title: "Quality Check", icon: "fa-clipboard-check" },
-            { title: "Packed & Labeled", icon: "fa-box-archive" },
-            { title: "Hub Transfer", icon: "fa-warehouse" },
-            { title: "In Transit", icon: "fa-route" },
-            { title: "Out for Delivery", icon: "fa-motorcycle" },
-            { title: "Delivered", icon: "fa-flag-checkered" }
-        ];
-
-        const statesData = [
-            { state: "Bihar", hubs: ["Patna (Near Hanuman Mandir)", "Gaya (Near Vishnupad Temple)", "Muzaffarpur (Near Jama Masjid)", "Bhagalpur (Near Town Hall)"] },
-            { state: "Uttar Pradesh", hubs: ["Lucknow (Near Hazratganj Chowk)", "Varanasi (Near Kashi Vishwanath)", "Kanpur (Near Civil Lines)", "Agra (Near Jama Masjid Road)"] },
-            { state: "Maharashtra", hubs: ["Mumbai (Near Siddhivinayak Temple)", "Pune (Near Fergusson College)", "Nagpur (Near Zero Mile)", "Nashik (Near Panchavati)"] },
-            { state: "Delhi NCR", hubs: ["New Delhi (Near Jama Masjid)", "Noida Sector 18 (Near Metro Station)", "Gurugram (Near DLF Cyber Hub)", "Delhi (Near Connaught Place)"] },
-            { state: "Karnataka", hubs: ["Bengaluru (Near MG Road)", "Mysuru (Near Palace Gate)", "Hubli (Near City Bus Stand)", "Mangaluru (Near Hampankatta)"] }
-        ];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedCount = localStorage.getItem('vsm_completed_tasks');
-            if(savedCount) {
-                completedTaskCount = parseInt(savedCount, 10);
-            }
-
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                if (splash) {
-                    splash.style.opacity = '0';
-                    setTimeout(() => {
-                        splash.style.display = 'none';
-                        checkUserStatus();
-                    }, 300);
-                }
-            }, 400);
+        await fetch(`${API_URL}/api/sync-wallet`, {
+            method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ mobile: currentUser.mobile, balance: localWallet })
         });
 
-        function checkUserStatus() {
-            const savedUser = localStorage.getItem('vsm_ecom_user');
-            const savedBank = localStorage.getItem('vsm_bank_account');
-            if (savedBank) {
-                savedBankAccount = JSON.parse(savedBank);
-            }
+        let res = await fetch(`${API_URL}/api/get-bank`, {
+            method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ mobile: currentUser.mobile })
+        });
+        let data = await res.json();
+        renderBankUI(data.bank);
+    }
 
-            if (!savedUser) {
-                document.getElementById('reg-container').style.display = 'flex';
-                document.getElementById('reg-step-1').style.display = 'flex';
-            } else {
-                try {
-                    const user = JSON.parse(savedUser);
-                    document.getElementById('login-user-name').innerText = "Welcome Back, " + (user.name || "Staff");
-                    document.getElementById('login-container').style.display = 'flex';
-                } catch (e) {
-                    localStorage.removeItem('vsm_ecom_user');
-                    document.getElementById('reg-container').style.display = 'flex';
-                    document.getElementById('reg-step-1').style.display = 'flex';
-                }
-            }
-        }
+    function closeWalletModal() {
+        document.getElementById("walletModal").classList.add("hidden");
+    }
 
-        function resetAppStorage() {
-            localStorage.removeItem('vsm_ecom_user');
-            localStorage.removeItem('vsm_bank_account');
-            localStorage.removeItem('vsm_completed_tasks');
-            completedTaskCount = 0;
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('reg-container').style.display = 'flex';
-            document.getElementById('reg-step-1').style.display = 'flex';
-            regPinValue = "";
-            regConfPinValue = "";
-            loginPinValue = "";
-        }
-
-        function goToRegStep2() {
-            const name = document.getElementById('reg-name').value.trim();
-            const mobile = document.getElementById('reg-mobile').value.trim();
-            if(!name || !mobile) {
-                showPopup("Error", "Please enter both name and mobile number!", "error");
-                return;
-            }
-            document.getElementById('reg-step-1').style.display = 'none';
-            document.getElementById('reg-step-2').style.display = 'flex';
-        }
-
-        function backToRegStep1() {
-            document.getElementById('reg-step-2').style.display = 'none';
-            document.getElementById('reg-step-1').style.display = 'flex';
-        }
-
-        function completeRegistration() {
-            if(regPinValue.length !== 6 || regConfPinValue.length !== 6) {
-                showPopup("Error", "Please enter a valid 6-digit PIN!", "error");
-                return;
-            }
-            if(regPinValue !== regConfPinValue) {
-                showPopup("Error", "PIN and Confirm PIN do not match!", "error");
-                return;
-            }
-
-            const name = document.getElementById('reg-name').value.trim();
-            const mobile = document.getElementById('reg-mobile').value.trim();
-            const userData = { name, mobile, pin: regPinValue };
-            localStorage.setItem('vsm_ecom_user', JSON.stringify(userData));
-            
-            showPopup("Success", "Registration successful! Account created.", "success", () => {
-                document.getElementById('reg-container').style.display = 'none';
-                document.getElementById('login-user-name').innerText = "Welcome Back, " + name;
-                document.getElementById('login-container').style.display = 'flex';
-            });
-        }
-
-        function openKeyboard(type) {
-            activeInputType = type;
-            if(type === 'pin') regPinValue = "";
-            if(type === 'conf') regConfPinValue = "";
-            if(type === 'login') loginPinValue = "";
-            updatePreview("");
-            updateLoginDots();
-            document.getElementById('iphone-keyboard').style.display = 'flex';
-        }
-
-        function closeKeyboardOverlay() {
-            document.getElementById('iphone-keyboard').style.display = 'none';
-            if(activeInputType === 'pin') updateFieldDisplay('reg-pin', regPinValue);
-            if(activeInputType === 'conf') updateFieldDisplay('reg-conf-pin', regConfPinValue);
-            if(activeInputType === 'login' && loginPinValue.length === 6) verifyLoginPin();
-        }
-
-        function pressKey(num) {
-            if(activeInputType === 'pin' && regPinValue.length < 6) {
-                regPinValue += num;
-                updatePreview(regPinValue);
-                updateFieldDisplay('reg-pin', regPinValue);
-            } else if(activeInputType === 'conf' && regConfPinValue.length < 6) {
-                regConfPinValue += num;
-                updatePreview(regConfPinValue);
-                updateFieldDisplay('reg-conf-pin', regConfPinValue);
-            } else if(activeInputType === 'login' && loginPinValue.length < 6) {
-                loginPinValue += num;
-                updatePreview(loginPinValue);
-                updateLoginDots();
-                if(loginPinValue.length === 6) {
-                    setTimeout(() => {
-                        document.getElementById('iphone-keyboard').style.display = 'none';
-                        verifyLoginPin();
-                    }, 250);
-                }
-            }
-        }
-
-        function deleteKey() {
-            if(activeInputType === 'pin' && regPinValue.length > 0) {
-                regPinValue = regPinValue.slice(0, -1);
-                updatePreview(regPinValue);
-                updateFieldDisplay('reg-pin', regPinValue);
-            } else if(activeInputType === 'conf' && regConfPinValue.length > 0) {
-                regConfPinValue = regConfPinValue.slice(0, -1);
-                updatePreview(regConfPinValue);
-                updateFieldDisplay('reg-conf-pin', regConfPinValue);
-            } else if(activeInputType === 'login' && loginPinValue.length > 0) {
-                loginPinValue = loginPinValue.slice(0, -1);
-                updatePreview(loginPinValue);
-                updateLoginDots();
-            }
-        }
-
-        function updatePreview(val) {
-            const previewBox = document.getElementById('keyboard-preview-box');
-            if (previewBox) previewBox.innerText = "•".repeat(val.length);
-        }
-
-        function updateFieldDisplay(id, val) {
-            const field = document.getElementById(id);
-            if (field) field.value = "•".repeat(val.length);
-        }
-
-        function updateLoginDots() {
-            for(let i=0; i<6; i++) {
-                const dot = document.getElementById(`ldot-${i}`);
-                if (dot) dot.style.backgroundColor = (i < loginPinValue.length) ? '#0284c7' : 'transparent';
-            }
-        }
-
-        function verifyLoginPin() {
-            const savedRaw = localStorage.getItem('vsm_ecom_user');
-            if (!savedRaw) {
-                checkUserStatus();
-                return;
-            }
-            const savedUser = JSON.parse(savedRaw);
-            if(loginPinValue === savedUser.pin) {
-                showPopup("Login Success", "Welcome back, " + savedUser.name + "!", "success", () => {
-                    document.getElementById('login-container').style.display = 'none';
-                    document.getElementById('main-app-wrapper').style.display = 'flex';
-                    initOrdersQueue();
-                    updateTaskUI();
+    function uploadPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Img = e.target.result;
+                document.getElementById("profilePreview").src = base64Img;
+                currentUser.profile_photo = base64Img;
+                await fetch(`${API_URL}/api/update-profile`, {
+                    method: "POST", headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ mobile: currentUser.mobile, profile_photo: base64Img })
                 });
-            } else {
-                showPopup("Incorrect PIN", "The 6-digit PIN you entered is incorrect.", "error", () => {
-                    loginPinValue = "";
-                    updateLoginDots();
-                });
-            }
-        }
-
-        function showSecurityError() {
-            showPopup("Access Restricted", "Full details are hidden due to security policies.", "error");
-        }
-
-        let popupCallback = null;
-        function showPopup(title, message, type, callback = null) {
-            document.getElementById('popup-title').innerText = title;
-            document.getElementById('popup-message').innerText = message;
-            popupCallback = callback;
-
-            const iconBox = document.getElementById('popup-icon-box');
-            const icon = document.getElementById('popup-icon');
-
-            if(type === 'success') {
-                iconBox.style.backgroundColor = '#dcfce7';
-                iconBox.style.color = '#16a34a';
-                icon.className = 'fa-solid fa-circle-check';
-            } else {
-                iconBox.style.backgroundColor = '#fee2e2';
-                iconBox.style.color = '#dc2626';
-                icon.className = 'fa-solid fa-triangle-exclamation';
-            }
-            document.getElementById('general-popup').style.display = 'flex';
-        }
-
-        function closeGeneralPopup() {
-            document.getElementById('general-popup').style.display = 'none';
-            if(popupCallback) {
-                const cb = popupCallback;
-                popupCallback = null;
-                cb();
-            }
-        }
-
-        function openWalletModal() {
-            const totalEarnings = (completedTaskCount * ratePerTask).toFixed(2);
-            document.getElementById('wallet-modal-balance').innerText = `₹${totalEarnings}`;
-            renderBankSection();
-            document.getElementById('wallet-modal').style.display = 'flex';
-        }
-
-        function closeWalletModal() {
-            document.getElementById('wallet-modal').style.display = 'none';
-        }
-
-        function openSupportModal() {
-            document.getElementById('support-modal').style.display = 'flex';
-        }
-
-        function closeSupportModal() {
-            document.getElementById('support-modal').style.display = 'none';
-        }
-
-        function renderBankSection() {
-            const bankSection = document.getElementById('bank-section');
-            if(!bankSection) return;
-
-            if(!savedBankAccount) {
-                bankSection.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <span style="font-size: 11px; font-weight: bold; color: #dc2626; display: block;">No Bank Account Added</span>
-                            <span style="font-size: 10px; color: #64748b;">Add your bank details for payout</span>
-                        </div>
-                        <button onclick="openBankModal()" style="padding: 6px 12px; background-color: #0284c7; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">Add Bank</button>
-                    </div>
-                `;
-            } else {
-                const maskedAcc = "XXXX" + savedBankAccount.acc.slice(-4);
-                bankSection.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <span style="font-size: 11px; font-weight: bold; color: #16a34a; display: block;"><i class="fa-solid fa-circle-check"></i> Bank Linked</span>
-                            <span style="font-size: 12px; font-weight: bold; color: #1e293b; display: block; margin-top: 2px;">${savedBankAccount.holder}</span>
-                            <span style="font-size: 11px; color: #64748b; display: block;">A/C: ${maskedAcc} | IFSC: ${savedBankAccount.ifsc}</span>
-                        </div>
-                        <button onclick="openBankModal()" style="padding: 4px 8px; background-color: #f1f5f9; color: #0284c7; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer;">Edit</button>
-                    </div>
-                `;
-            }
-        }
-
-        function openBankModal() {
-            if(savedBankAccount) {
-                document.getElementById('bank-holder').value = savedBankAccount.holder;
-                document.getElementById('bank-acc').value = savedBankAccount.acc;
-                document.getElementById('bank-ifsc').value = savedBankAccount.ifsc;
-            } else {
-                document.getElementById('bank-holder').value = "";
-                document.getElementById('bank-acc').value = "";
-                document.getElementById('bank-ifsc').value = "";
-            }
-            document.getElementById('bank-modal').style.display = 'flex';
-        }
-
-        function closeBankModal() {
-            document.getElementById('bank-modal').style.display = 'none';
-        }
-
-        function saveBankAccount() {
-            const holder = document.getElementById('bank-holder').value.trim();
-            const acc = document.getElementById('bank-acc').value.trim();
-            const ifsc = document.getElementById('bank-ifsc').value.trim().toUpperCase();
-
-            if(!holder || !acc || !ifsc) {
-                showPopup("Error", "Please fill all bank details!", "error");
-                return;
-            }
-
-            savedBankAccount = { holder, acc, ifsc };
-            localStorage.setItem('vsm_bank_account', JSON.stringify(savedBankAccount));
-            closeBankModal();
-            renderBankSection();
-            showPopup("Success", "Bank account saved successfully!", "success");
-        }
-
-        function initOrdersQueue() {
-            queueOrders = [];
-            for(let i=0; i<6; i++) {
-                queueOrders.push(createNewRandomOrder());
-            }
-            renderQueueUI();
-            updateTaskUI();
-        }
-
-        function createNewRandomOrder() {
-            const selectedBrandObj = brandCatalog[Math.floor(Math.random() * brandCatalog.length)];
-            const selectedProd = selectedBrandObj.products[Math.floor(Math.random() * selectedBrandObj.products.length)];
-            
-            const randomAction = actionTypes[Math.floor(Math.random() * actionTypes.length)];
-            const randomStateObj = statesData[Math.floor(Math.random() * statesData.length)];
-            const randomLocation = randomStateObj.hubs[Math.floor(Math.random() * randomStateObj.hubs.length)];
-            
-            const randomPrice = Math.floor(300 + Math.random() * 2500);
-            const randomIdNum = Math.floor(10000 + Math.random() * 90000);
-            const paymentType = Math.random() > 0.5 ? "Prepaid" : "COD";
-
-            const daysAgo = Math.floor(Math.random() * 5);
-            const d = new Date();
-            d.setDate(d.getDate() - daysAgo);
-            const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            const orderDateStr = d.toLocaleDateString('en-IN', options);
-
-            return {
-                uniqueKey: 'ord_' + Math.random().toString(36).substr(2, 9),
-                orderId: `IS-${randomIdNum}`,
-                brand: selectedBrandObj,
-                itemText: `📦 Item: ${selectedProd} | Price: <span class="blur-data" style="color:#d97706; font-weight:bold;">₹${randomPrice}</span> | Type: ${paymentType}`,
-                locationText: `📍 Location: ${randomLocation.split('(')[0].trim()}, ****, ${randomStateObj.state}`,
-                dateText: orderDateStr,
-                action: randomAction
             };
+            reader.readAsDataURL(file);
         }
+    }
 
-        function renderQueueUI() {
-            const container = document.getElementById('orders-queue-list');
-            if (!container) return;
-            container.innerHTML = "";
-
-            queueOrders.forEach((ord) => {
-                const card = document.createElement('div');
-                card.className = "order-card-anim";
-                card.style.cssText = "background: white; padding: 14px; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 10px;";
-                
-                card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 36px; height: 36px; border-radius: 8px; background: ${ord.brand.bg}; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;">
-                                <i class="${ord.brand.icon}" style="color: ${ord.brand.color}; font-size: 16px;"></i>
-                            </div>
-                            <div>
-                                <span style="font-size: 11px; font-weight: bold; color: #0284c7;">ORDER #${ord.orderId}</span>
-                                <h4 style="font-size: 13px; font-weight: bold; color: #1e293b; margin: 0;">${ord.brand.name}</h4>
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="font-size: 10px; color: ${ord.action.color}; background: ${ord.action.bg}; padding: 2px 8px; border-radius: 4px; font-weight: 600; display: block; margin-bottom: 2px;">${ord.action.label}</span>
-                            <span style="font-size: 10px; color: #64748b; font-weight: 500;"><i class="fa-regular fa-calendar"></i> ${ord.dateText}</span>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 8px;">
-                        <span class="blur-data" style="font-size: 13px; font-weight: 600; letter-spacing: 1px; color: #1e293b;">+91 98421 XXXXX</span>
-                        <button onclick="showSecurityError()" style="background: none; border: none; color: #0284c7; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 3px;">
-                            <i class="fa-solid fa-eye"></i> <span style="font-size: 10px; font-weight: 600;">View</span>
-                        </button>
-                    </div>
-
-                    <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 8px;">
-                        <span style="font-size: 12px; font-weight: 500; color: #334155;">📍 Address: ${ord.locationText.replace(/📍 Location: /, '')}</span>
-                        <span style="font-size: 10px; color: #dc2626; font-weight: bold; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Protected</span>
-                    </div>
-
-                    <div style="font-size: 12px; background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 8px; border-radius: 8px; color: #334155;">
-                        ${ord.itemText}
-                    </div>
-
-                    <button onclick="openPreviewPopup('${ord.uniqueKey}')" style="width: 100%; padding: 10px; background-color: ${ord.action.color}; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        <i class="fa-solid ${ord.action.icon}"></i> Mark as ${ord.action.label}
-                    </button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function openPreviewPopup(uniqueKey) {
-            selectedOrderForPreview = queueOrders.find(o => o.uniqueKey === uniqueKey);
-            if (!selectedOrderForPreview) return;
-
-            document.getElementById('prev-title').innerText = `Preview: ${selectedOrderForPreview.action.label}`;
-            document.getElementById('prev-subtitle').innerText = `Order #${selectedOrderForPreview.orderId} (${selectedOrderForPreview.brand.name})`;
-            
-            const iconBox = document.getElementById('prev-icon-box');
-            iconBox.style.backgroundColor = selectedOrderForPreview.action.bg;
-            iconBox.style.color = selectedOrderForPreview.action.color;
-            document.getElementById('prev-icon').className = `fa-solid ${selectedOrderForPreview.action.icon}`;
-
-            renderStagesList(selectedOrderForPreview.action.stepIndex);
-
-            const detailsBox = document.getElementById('prev-details-box');
-            detailsBox.innerHTML = `
-                <div><strong>Brand:</strong> ${selectedOrderForPreview.brand.name}</div>
-                <div><strong>Order ID:</strong> #${selectedOrderForPreview.orderId}</div>
-                <div><strong>Order Date:</strong> ${selectedOrderForPreview.dateText}</div>
-                <div><strong>Item Details:</strong> ${selectedOrderForPreview.itemText}</div>
-                <div><strong>Hub/Location:</strong> ${selectedOrderForPreview.locationText}</div>
+    function renderBankUI(bank) {
+        const sec = document.getElementById("bankSectionContent");
+        if (!bank || bank.status === 'Cancelled') {
+            sec.innerHTML = `
+                <p style="font-size:13px; color:#e53e3e; font-weight:600;">Link Bank Account for Payouts:</p>
+                <div class="input-group" style="margin-bottom:8px;"><input type="text" id="bName" placeholder="Bank Name"></div>
+                <div class="input-group" style="margin-bottom:8px;"><input type="text" id="bAcc" placeholder="Account Number"></div>
+                <div class="input-group" style="margin-bottom:12px;"><input type="text" id="bIfsc" placeholder="IFSC Code"></div>
+                <button onclick="saveBankDetails()" style="padding:10px;">Save Bank Account</button>
             `;
-
-            document.getElementById('preview-popup').style.display = 'flex';
+        } else {
+            let stClass = bank.status === 'Verified' ? 'status-verified' : (bank.status === 'Cancelled' ? 'status-cancelled' : 'status-pending');
+            sec.innerHTML = `
+                <div style="background:#f8f9fe; padding:12px; border-radius:12px; font-size:13px; border:1px solid #eef2f7;">
+                    <div><b>Bank:</b> ${bank.bank_name}</div>
+                    <div><b>A/C No:</b> ${bank.account_no}</div>
+                    <div><b>IFSC:</b> ${bank.ifsc}</div>
+                    <div class="bank-status-box ${stClass}">Status: ${bank.status}</div>
+                </div>
+            `;
         }
+    }
 
-        function renderStagesList(activeIndex) {
-            const container = document.getElementById('stages-container');
-            if(!container) return;
-            container.innerHTML = "";
+    async function saveBankDetails() {
+        const bank_name = document.getElementById("bName").value.trim();
+        const account_no = document.getElementById("bAcc").value.trim();
+        const ifsc = document.getElementById("bIfsc").value.trim();
 
-            logisticsStages.forEach((stage, idx) => {
-                let statusColor = "#94a3b8"; 
-                let iconBg = "#e2e8f0";
-                let iconColor = "#64748b";
-                let textWeight = "normal";
+        if (!bank_name || !account_no || !ifsc) { alert("Please fill all bank details"); return; }
 
-                if (idx < activeIndex) {
-                    statusColor = "#16a34a";
-                    iconBg = "#dcfce7";
-                    iconColor = "#16a34a";
-                } else if (idx === activeIndex) {
-                    statusColor = "#0284c7";
-                    iconBg = "#e0f2fe";
-                    iconColor = "#0284c7";
-                    textWeight = "bold";
-                }
-
-                const stageRow = document.createElement('div');
-                stageRow.style.cssText = "display: flex; align-items: center; justify-content: space-between; font-size: 11px; padding: 2px 4px;";
-                
-                stageRow.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div style="width: 20px; height: 20px; border-radius: 50%; background: ${iconBg}; color: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 10px;">
-                            <i class="fa-solid ${stage.icon}"></i>
-                        </div>
-                        <span style="color: ${idx <= activeIndex ? '#1e293b' : '#94a3b8'}; font-weight: ${textWeight};">${idx + 1}. ${stage.title}</span>
-                    </div>
-                    <span style="font-size: 10px; font-weight: 600; color: ${statusColor};">
-                        ${idx < activeIndex ? 'Completed' : (idx === activeIndex ? 'Current Stage' : 'Pending')}
-                    </span>
-                `;
-                container.appendChild(stageRow);
-            });
+        let res = await fetch(`${API_URL}/api/save-bank`, {
+            method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ mobile: currentUser.mobile, bank_name, account_no, ifsc })
+        });
+        let data = await res.json();
+        if (data.success) {
+            alert("Bank account submitted for verification!");
+            openWalletModal();
         }
+    }
+</script>
 
-        function closePreviewPopup() {
-            document.getElementById('preview-popup').style.display = 'none';
-            selectedOrderForPreview = null;
-        }
-
-        function confirmAndExecuteOrder() {
-            if (!selectedOrderForPreview) return;
-            const keyToProcess = selectedOrderForPreview.uniqueKey;
-            closePreviewPopup();
-
-            completedTaskCount++;
-            localStorage.setItem('vsm_completed_tasks', completedTaskCount);
-            
-            updateTaskUI();
-
-            queueOrders = queueOrders.filter(o => o.uniqueKey !== keyToProcess);
-            queueOrders.push(createNewRandomOrder());
-            
-            renderQueueUI();
-        }
-
-        function updateTaskUI() {
-            const counterText = document.getElementById('counter-text');
-            if (counterText) counterText.innerText = `${completedTaskCount} Tasks`;
-            
-            const progressBar = document.getElementById('progress-bar');
-            if (progressBar) {
-                const percentage = ((completedTaskCount % 50) / 50) * 100;
-                progressBar.style.width = `${percentage}%`;
-            }
-
-            const totalEarnings = (completedTaskCount * ratePerTask).toFixed(2);
-            const payoutBadge = document.getElementById('payout-badge');
-            if (payoutBadge) {
-                payoutBadge.innerText = `₹${totalEarnings}`;
-            }
-            const modalBal = document.getElementById('wallet-modal-balance');
-            if (modalBal) {
-                modalBal.innerText = `₹${totalEarnings}`;
-            }
-        }
-    </script>
 </body>
 </html>
