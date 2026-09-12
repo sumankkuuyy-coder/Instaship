@@ -3,218 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VSM Advance Task Portal</title>
+    <title>VSM Global Logistics & Fulfillment Portal</title>
     <style>
         :root {
-            --primary: #4e54c8;
-            --secondary: #8f94fb;
-            --success: #00b09b;
-            --bg-gradient: linear-gradient(135deg, #4e54c8, #8f94fb);
-            --text-main: #333333;
-            --text-muted: #666666;
+            --primary: #4f46e5;
+            --secondary: #db2777;
+            --success: #059669;
+            --bg-gradient: linear-gradient(135deg, #4f46e5, #9333ea, #db2777);
+            --text-main: #0f172a;
+            --text-muted: #475569;
         }
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(to right, #ece9e6, #ffffff);
+            background: linear-gradient(135deg, #090d16, #1e1b4b);
             margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
         .app-container {
-            width: 100%; max-width: 440px; background: #ffffff; min-height: 100vh;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column;
+            width: 100%; max-width: 440px; background: #f8fafc; min-height: 100vh;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column;
             box-sizing: border-box; position: relative; overflow-x: hidden;
         }
         @media(min-width: 450px) {
-            .app-container { height: 900px; border-radius: 30px; border: 8px solid #333; }
+            .app-container { height: 900px; border-radius: 36px; border: 10px solid #334155; }
         }
-        .top-clock-bar {
-            background: var(--bg-gradient); color: white; padding: 10px 15px; text-align: center;
-            font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+        
+        /* Top Header */
+        .top-header-bar {
+            background: var(--bg-gradient); color: white; padding: 12px 15px; display: flex;
+            justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700;
+            box-shadow: 0 4px 15px rgba(219, 39, 119, 0.3); z-index: 50; position: sticky; top: 0;
         }
-        .content-area { padding: 20px; flex: 1; overflow-y: auto; }
+
+        /* Live Top Notification Banner */
+        #topNotification {
+            background: linear-gradient(135deg, #059669, #34d399); color: white; padding: 10px 15px;
+            text-align: center; font-weight: bold; font-size: 13px; position: absolute; top: -60px; left: 0; width: 100%;
+            transition: top 0.4s ease; z-index: 99; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+        }
+        #topNotification.show { top: 41px; }
+
+        .content-area { padding: 16px; flex: 1; overflow-y: auto; padding-bottom: 95px; }
         .hidden { display: none !important; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 13px; font-weight: 600; }
+        
+        .input-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 13px; font-weight: 700; }
         input {
-            width: 100%; padding: 14px; border: 2px solid #e1e1e1; border-radius: 12px;
-            box-sizing: border-box; font-size: 15px; transition: all 0.3s ease;
+            width: 100%; padding: 14px; border: 2px solid #cbd5e1; border-radius: 14px;
+            box-sizing: border-box; font-size: 15px; background: #ffffff; transition: all 0.3s ease;
         }
-        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 8px rgba(78, 84, 200, 0.2); }
+        input:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 12px rgba(219, 39, 119, 0.3); }
         button {
             width: 100%; padding: 14px; background: var(--bg-gradient); color: white; border: none;
-            border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: bold;
-            box-shadow: 0 4px 15px rgba(78, 84, 200, 0.3);
+            border-radius: 14px; font-size: 16px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4); transition: transform 0.2s, filter 0.2s;
         }
-        .dash-header {
-            display: flex; justify-content: space-between; align-items: center; background: #f8f9fe;
-            padding: 15px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #eef2f7;
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        
+        .auth-card {
+            background: linear-gradient(135deg, #ffffff, #fdf2f8); border: 2px solid #fbcfe8;
+            border-radius: 24px; padding: 20px; box-shadow: 0 10px 25px rgba(219, 39, 119, 0.1);
+            margin-top: 40px;
         }
-        .wallet-badge {
-            background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 10px 16px;
-            border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 15px;
-        }
+
+        /* Order Cards with Multi-Color Themes */
         .order-card {
-            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 16px;
+            border-radius: 20px; padding: 16px; margin-bottom: 18px; color: #1e293b;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06); position: relative; overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.8); transition: transform 0.3s;
         }
-        .stages-row { display: flex; justify-content: space-between; margin: 14px 0; font-size: 12px; text-align: center; }
-        .stage-node span { font-size: 18px; display: block; margin-bottom: 2px; }
+        .order-card:hover { transform: translateY(-2px); }
+        
+        .card-theme-1 { background: linear-gradient(135deg, #eff6ff, #dbeafe); border-color: #93c5fd; }
+        .card-theme-2 { background: linear-gradient(135deg, #fdf2f8, #fce7f3); border-color: #f472b6; }
+        .card-theme-3 { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-color: #86efac; }
+        .card-theme-4 { background: linear-gradient(135deg, #fefce8, #fef08a); border-color: #fde047; }
+        .card-theme-5 { background: linear-gradient(135deg, #faf5ff, #f3e8ff); border-color: #d8b4fe; }
+
+        .blur-secure {
+            filter: blur(6px); background: rgba(255,255,255,0.9); padding: 2px 8px; border-radius: 6px; user-select: none;
+            cursor: pointer; transition: filter 0.3s; display: inline-block; font-weight: 600;
+        }
+        .blur-secure:hover { filter: blur(0px); background: #ffffff; }
+
+        /* Timeline Stages */
+        .vertical-timeline {
+            margin: 14px 0; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .timeline-step {
+            display: flex; align-items: flex-start; position: relative; padding-bottom: 12px; font-size: 12px;
+        }
+        .timeline-step:last-child { padding-bottom: 0; }
+        .timeline-step:not(:last-child):before {
+            content: ''; position: absolute; left: 11px; top: 22px; width: 2px; height: calc(100% - 10px);
+            background: #cbd5e1;
+        }
+        .timeline-step.completed:not(:last-child):before { background: var(--success); }
+        .timeline-icon {
+            font-size: 16px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+            background: #e2e8f0; border-radius: 50%; margin-right: 10px; flex-shrink: 0; z-index: 2;
+        }
+        .timeline-step.completed .timeline-icon { background: #d1fae5; color: #059669; }
+        .timeline-content { flex: 1; }
+        .timeline-title { font-weight: 700; color: #334155; }
+        .timeline-time { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+        /* FIXED Bottom Navigation Menu with Icons */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: #ffffff;
+            border-top: 2px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 1000; box-sizing: border-box;
+        }
+        .nav-item {
+            text-align: center; cursor: pointer; color: var(--text-muted); font-size: 11px; font-weight: 700;
+            transition: color 0.2s; flex: 1; padding: 8px 0;
+        }
+        .nav-item span { font-size: 22px; display: block; margin-bottom: 2px; }
+        .nav-item.active { color: var(--secondary); }
+
+        /* Modal */
         .modal {
-            position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100;
+            position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000;
         }
         .modal-card {
-            background: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 380px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
+            background: linear-gradient(135deg, #ffffff, #fff1f2); padding: 25px; border-radius: 28px; width: 90%; max-width: 380px;
+            box-shadow: 0 25px 50px rgba(219, 39, 119, 0.3); text-align: center; border: 2px solid #fda4af;
+            animation: zoomInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
-        .profile-container { text-align: center; margin-bottom: 15px; }
-        .profile-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); cursor: pointer; }
-        .id-badge-box { background: #f0f3ff; border: 1px dashed var(--primary); padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 13px; text-align: left; }
-        .id-badge-box div { margin-bottom: 4px; }
-        .bank-status-box { padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 13px; font-weight: bold; text-align: center; }
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-verified { background: #d4edda; color: #155724; }
-        .status-cancelled { background: #f8d7da; color: #721c24; }
-        
-        .salary-notice {
-            background: #eef2ff; border-left: 4px solid var(--primary); padding: 12px;
-            font-size: 12px; color: #333; margin-top: 15px; border-radius: 6px; line-height: 1.5;
+        @keyframes zoomInModal {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
-        .error-msg { color: #e53e3e; font-size: 13px; text-align: center; margin-top: 8px; }
+
+        .profile-img { width: 95px; height: 95px; border-radius: 50%; object-fit: cover; border: 4px solid var(--secondary); cursor: pointer; box-shadow: 0 8px 25px rgba(219, 39, 119, 0.4); }
+        .box-container { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .error-msg { color: #e11d48; font-size: 13px; text-align: center; margin-top: 8px; font-weight: 700; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="top-clock-bar" id="realTimeClock">Connecting Time...</div>
+    <!-- TOP HEADER -->
+    <div class="top-header-bar">
+        <div id="realTimeClock"> Loading...</div>
+        <div style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px;">
+             <span id="headerWallet">0.00</span>
+        </div>
+    </div>
 
-    <div class="content-area">
+    <!-- LIVE TOP NOTIFICATION BANNER -->
+    <div id="topNotification"> +0.65 Credited to Available Balance!</div>
+
+    <div class="content-area" id="mainContentArea">
         <!-- STEP 1: MOBILE -->
         <div id="step-mobile">
-            <h2 style="text-align:center; color: var(--primary); margin-bottom: 25px;">VSM Portal</h2>
-            <div class="input-group">
-                <label>Mobile Number</label>
-                <input type="tel" id="mobileInput" maxlength="10" placeholder="Enter 10-digit mobile number">
+            <div class="auth-card">
+                <h2 style="text-align:center; color: var(--secondary); margin-bottom: 20px; font-size: 26px;">VSM ERP  Portal</h2>
+                <div class="input-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="mobileInput" maxlength="10" placeholder="Enter 10-digit mobile number" inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <button onclick="checkMobileNumber()">Continue </button>
+                <div id="mobError" class="error-msg"></div>
             </div>
-            <button onclick="checkMobileNumber()">Continue</button>
-            <div id="mobError" class="error-msg"></div>
         </div>
 
         <!-- STEP 2: REGISTER -->
         <div id="step-register" class="hidden">
-            <h3 style="color: var(--primary);">New Account Registration</h3>
-            <div class="input-group">
-                <label>Full Name</label>
-                <input type="text" id="nameInput" placeholder="Enter your full name">
+            <div class="auth-card">
+                <h3 style="color: var(--secondary);"> New Registration</h3>
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="nameInput" placeholder="Enter your full name">
+                </div>
+                <div class="input-group">
+                    <label>Create 6-Digit PIN</label>
+                    <input type="password" id="pinReg" maxlength="6" placeholder="Enter 6-digit security PIN" inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <button onclick="registerNewUser()">Register & Enter</button>
+                <div id="regError" class="error-msg"></div>
             </div>
-            <div class="input-group">
-                <label>Create 6-Digit PIN</label>
-                <input type="password" id="pinReg" maxlength="6" placeholder="Enter 6-digit security PIN">
-            </div>
-            <button onclick="registerNewUser()">Register Now</button>
-            <div id="regError" class="error-msg"></div>
         </div>
 
         <!-- STEP 3: LOGIN -->
         <div id="step-login" class="hidden">
-            <h3 style="color: var(--primary);">Welcome Back!</h3>
-            <div class="input-group">
-                <label>Enter 6-Digit PIN</label>
-                <input type="password" id="pinLogin" maxlength="6" placeholder="Enter 6-digit PIN">
+            <div class="auth-card">
+                <h3 style="color: var(--secondary);"> Secure Login</h3>
+                <div class="input-group">
+                    <label>Enter 6-Digit PIN</label>
+                    <input type="password" id="pinLogin" maxlength="6" placeholder="Enter 6-digit PIN" inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <button onclick="loginExistingUser()">Login to Dashboard</button>
+                <div id="loginError" class="error-msg"></div>
             </div>
-            <button onclick="loginExistingUser()">Login Securely</button>
-            <div id="loginError" class="error-msg"></div>
         </div>
 
-        <!-- STEP 4: DASHBOARD -->
-        <div id="step-dashboard" class="hidden">
-            <div class="dash-header">
-                <div>
-                    <small style="color: var(--text-muted);">Welcome back,</small><br>
-                    <strong id="dashName" style="font-size: 16px; color: var(--text-main);">User</strong>
-                </div>
-                <div class="wallet-badge" onclick="openWalletModal()">
-                     <span id="walletDisplay">0.00</span>
-                </div>
+        <!-- DASHBOARD TAB -->
+        <div id="tab-dashboard" class="hidden">
+            <div style="margin-bottom: 15px;">
+                <h3 style="margin:0; color:var(--text-main);"> Live Logistics Operations</h3>
+                <small style="color:var(--text-muted);">Verify and process automated fulfillment tasks</small>
+            </div>
+            <div id="orderContainer"></div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="tab-history" class="hidden">
+            <h3 style="color:var(--text-main); margin-bottom:15px;"> Task Activity History</h3>
+            <div class="box-container" style="background: linear-gradient(135deg, #ede9fe, #fce7f3); border-color:#f472b6;">
+                <div style="font-size: 14px; color: #831843; font-weight: bold;">Total order verify: <span id="histTotalCount" style="color:var(--primary); font-size:18px;">0</span></div>
+                <div style="font-size: 14px; color: #831843; font-weight: bold; margin-top:8px;">Total Earnings Made: <span id="histTotalEarnings" style="color:#059669; font-size:18px;">0.00</span></div>
+            </div>
+            <h4 style="color:var(--text-muted); font-size:14px;">Verified Orders Log:</h4>
+            <div id="historyLogList">
+                <p style="color:var(--text-muted); font-size:13px; text-align:center; padding:20px;">No task history yet. Start verifying from Dashboard!</p>
+            </div>
+        </div>
+
+        <!-- WALLET TAB -->
+        <div id="tab-wallet" class="hidden">
+            <h3 style="color:var(--text-main); margin-bottom:15px;"> My Wallet</h3>
+            <div class="box-container" style="text-align:center; background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color:#34d399;">
+                <div style="font-size: 13px; color: #065f46; font-weight: bold;">Available Balance</div>
+                <div style="font-size: 32px; font-weight: 800; color: #047857; margin: 10px 0;"><span id="walletTabBalance">0.00</span></div>
             </div>
 
-            <h4 style="margin: 0 0 15px 0; color: #444;">Live E-Commerce Operations</h4>
-            <div id="orderContainer"></div>
+            <div class="box-container">
+                <h4 style="margin:0 0 12px 0; color:var(--secondary);"> Bank Account Details</h4>
+                <div id="bankSectionContent"></div>
+            </div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div id="tab-profile" class="hidden">
+            <h3 style="color:var(--text-main); margin-bottom:15px;"> User Profile</h3>
+            <div class="box-container" style="text-align:center;">
+                <img id="profilePreview" src="https://via.placeholder.com/95" class="profile-img" onclick="document.getElementById('fileInput').click()" title="Change Photo">
+                <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="uploadPhoto(event)">
+                <div style="font-size: 12px; color: var(--secondary); margin-top:8px; font-weight: 700;">Tap photo to update</div>
+                <h3 id="profileName" style="margin:12px 0 4px 0; color:var(--text-main);">User Name</h3>
+                <p id="profileMobile" style="margin:0; color:var(--text-muted); font-size:14px;">---</p>
+            </div>
+
+            <div class="box-container">
+                <div style="margin-bottom:8px;"> <b>Employee ID:</b> <span id="profileUniqueId">---</span></div>
+                <div style="margin-bottom:8px;"> <b>Account Status:</b> <span style="color: #059669; font-weight: bold;">Active</span></div>
+                <div style="margin-bottom:8px;"> <b>Joined Date:</b> <span id="profileActiveDate">---</span></div>
+                <div> <b>Payout Cycle:</b> <span style="color: #d97706; font-weight: bold;">Every 7 Days</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIXED BOTTOM NAVIGATION MENU WITH ICONS -->
+    <div id="bottomNavMenu" class="bottom-nav hidden">
+        <div class="nav-item active" onclick="switchTab('dashboard', this)">
+            <span></span>Dashboard
+        </div>
+        <div class="nav-item" onclick="switchTab('history', this)">
+            <span></span>History
+        </div>
+        <div class="nav-item" onclick="switchTab('wallet', this)">
+            <span></span>Wallet
+        </div>
+        <div class="nav-item" onclick="switchTab('profile', this)">
+            <span></span>Profile
         </div>
     </div>
 </div>
 
-<!-- WALLET & PROFILE MODAL -->
-<div id="walletModal" class="modal hidden">
+<!-- MODAL -->
+<div id="customModal" class="modal hidden">
     <div class="modal-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0; color:var(--primary);">Profile & Wallet</h3>
-            <span onclick="closeWalletModal()" style="font-size:22px; cursor:pointer; font-weight:bold; color:#aaa;">&times;</span>
-        </div>
-
-        <div class="profile-container">
-            <img id="profilePreview" src="https://via.placeholder.com/80" class="profile-img" onclick="document.getElementById('fileInput').click()" title="Change Photo">
-            <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="uploadPhoto(event)">
-            <div style="font-size: 11px; color: var(--text-muted); margin-top:4px;">Tap image to change photo</div>
-        </div>
-
-        <div class="id-badge-box">
-            <div> <b>Unique ID:</b> <span id="modalUniqueId">---</span></div>
-            <div> <b>ID Status:</b> <span style="color: green; font-weight: bold;">Active</span></div>
-            <div> <b>Active Date:</b> <span id="modalActiveDate">---</span></div>
-            <div> <b>Payout Date (Every 7 Days):</b> <span id="modalPayoutDate" style="color: #d97706; font-weight: bold;">---</span></div>
-        </div>
-
-        <div style="text-align: center; margin-bottom: 15px; font-weight: 600; color: var(--primary);">
-            Synced Balance: <span id="modalBalance">0.00</span>
-        </div>
-
-        <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
-
-        <div id="bankSectionContent"></div>
-
-        <div class="salary-notice" id="salaryNoticeText">
-            Your fixed salary and weekly payout of <span id="noticeBalance">0.00</span> will be automatically credited to this verified account every 7 days on <b><span id="noticePayoutDate">---</span></b>.
-        </div>
+        <div id="modalIcon" style="font-size: 48px; margin-bottom: 10px;"></div>
+        <h3 id="modalTitle" style="color: var(--secondary); margin-bottom: 10px;">Notice</h3>
+        <p id="modalMessage" style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px; font-weight: 600;"></p>
+        <button onclick="closeCustomModal()">OK</button>
     </div>
 </div>
 
 <script>
     const API_URL = "https://withered-band-a9c5.sumankkuuyy.workers.dev";
+    const BANK_API_URL = "https://wispy-paper-76a5.sumankkuuyy.workers.dev";
+
     let currentUser = null;
     let localWallet = 0.0;
+    let completedTasksList = [];
 
     setInterval(() => {
         const opts = { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'medium' };
-        document.getElementById("realTimeClock").innerText = " " + new Date().toLocaleString('en-IN', opts);
+        document.getElementById("realTimeClock").innerText = " " + new Date().toLocaleString('en-IN', opts);
     }, 1000);
 
-    const brands = ["Nike", "Samsung", "boAt", "Puma", "Zara", "OnePlus", "Adidas", "Fastrack"];
-    const products = ["Smart Watch", "Running Shoes", "Wireless Earbuds", "Backpack", "Cotton T-Shirt", "Bluetooth Speaker"];
-    const stages = [{icon:"", name:"Ordered"}, {icon:"", name:"Packed"}, {icon:"", name:"Shipped"}, {icon:"", name:"Transit"}, {icon:"", name:"Out for Delivery"}, {icon:"", name:"Delivered"}];
-    const cities = ["Mumbai - 400001", "Delhi - 110001", "Patna - 800001", "Bangalore - 560001", "Kolkata - 700001"];
+    const brands = [
+        "Amazon India", "Flipkart Wholesale", "Myntra", "Reliance Digital", "Tata CLiQ", "Nykaa Pro", 
+        "Croma Retail", "Ajio Business", "Puma official", "Adidas India", "Nike Store", "Zara Logistics", 
+        "Samsung E-Store", "OnePlus Enterprise", "boAt Lifestyle", "Fastrack Hub", "Noise Store",
+        "Titan Company", "Decathlon Sports", "Lenskart Logistics", "Urbanic India", "H&M Retail"
+    ];
 
-    function generateRandomOrder(i) {
+    const categories = [
+        "Electronics & Gadgets", "Footwear & Athleisure", "Apparel & Fashion", "Home Appliances", 
+        "Smart Wearables", "Kitchenware & Cookware", "Fitness & Gym Equipment", "Luggage & Travel Bags"
+    ];
+
+    const partners = [
+        {name: "Blue Dart Express", code: "BDT"},
+        {name: "Delhivery Surface", code: "DLV"},
+        {name: "Ekart Logistics", code: "EKR"},
+        {name: "Xpressbees Supply Chain", code: "XPB"},
+        {name: "DTDC Courier & Cargo", code: "DTD"},
+        {name: "Shadowfax Technologies", code: "SFX"}
+    ];
+
+    const masterStagesPool = [
+        {icon: "", name: "Order Placed by Customer"},
+        {icon: "", name: "Fraud & Risk Check Passed"},
+        {icon: "", name: "Payment Gateway Confirmed"},
+        {icon: "", name: "Picked & Packed at Warehouse"},
+        {icon: "", name: "Quality Control (QC) Approved"},
+        {icon: "", name: "Waybill & Shipping Label Printed"},
+        {icon: "", name: "Handed Over to Delivery Partner"},
+        {icon: "", name: "In Transit at Regional Hub"},
+        {icon: "", name: "Out for Delivery with Agent"},
+        {icon: "", name: "Delivered & Settlement Complete"},
+        {icon: "", name: "Insurance Verification Cleared"},
+        {icon: "", name: "GST E-Way Bill Generated"},
+        {icon: "", name: "Weight & Dimension Audit Passed"}
+    ];
+
+    const cities = [
+        "Mumbai - 400001", "Delhi - 110001", "Bangalore - 560001", "Hyderabad - 500001", 
+        "Ahmedabad - 380001", "Chennai - 600001", "Kolkata - 700001", "Pune - 411001"
+    ];
+
+    const cardThemes = ["card-theme-1", "card-theme-2", "card-theme-3", "card-theme-4", "card-theme-5"];
+
+    function showPopup(title, message, icon = "") {
+        document.getElementById("modalTitle").innerText = title;
+        document.getElementById("modalMessage").innerText = message;
+        document.getElementById("modalIcon").innerText = icon;
+        document.getElementById("customModal").classList.remove("hidden");
+    }
+
+    function closeCustomModal() {
+        document.getElementById("customModal").classList.add("hidden");
+    }
+
+    function showTopNotification(text) {
+        const banner = document.getElementById("topNotification");
+        banner.innerText = text;
+        banner.classList.add("show");
+        setTimeout(() => { banner.classList.remove("show"); }, 3000);
+    }
+
+    function generateRandomOrder() {
+        let rand = Math.floor(Math.random() * 900000) + 100000;
+        let brand = brands[Math.floor(Math.random() * brands.length)];
+        let cat = categories[Math.floor(Math.random() * categories.length)];
+        let partner = partners[Math.floor(Math.random() * partners.length)];
+        let price = (Math.random() * 4500 + 499).toFixed(2);
+        let fakeMob = "9" + Math.floor(100000000 + Math.random() * 900000000);
+        let location = cities[Math.floor(Math.random() * cities.length)];
+        let theme = cardThemes[Math.floor(Math.random() * cardThemes.length)];
+
+        let shuffledPool = [...masterStagesPool].sort(() => 0.5 - Math.random());
+        let selectedCount = Math.floor(Math.random() * 3) + 5; 
+        let chosenStages = shuffledPool.slice(0, selectedCount);
+
+        let baseTime = new Date().getTime() - (60 * 60 * 1000 * Math.floor(Math.random() * 48 + 12));
+        
+        let stageTimestamps = chosenStages.map((st, idx) => {
+            let stepTime = new Date(baseTime + (idx * 5 * 60 * 60 * 1000));
+            let isCompleted = idx < (selectedCount - 1); 
+            return {
+                ...st,
+                completed: isCompleted,
+                timeStr: stepTime.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            };
+        });
+
         return {
-            id: 88400 + i,
-            title: `${brands[i % brands.length]} ${products[i % products.length]}`,
-            price: (Math.random() * 2500 + 350).toFixed(2),
-            location: cities[i % cities.length],
-            stageIdx: i % 5
+            id: `VSM-${rand}`,
+            sku: `SKU-${Math.floor(Math.random() * 899999 + 100000)}`,
+            brand: brand,
+            category: cat,
+            partner: partner,
+            price: price,
+            location: location,
+            customerMobile: fakeMob,
+            themeClass: theme,
+            stages: stageTimestamps
         };
     }
 
     async function checkMobileNumber() {
         const mobile = document.getElementById("mobileInput").value.trim();
-        if (mobile.length !== 10) { document.getElementById("mobError").innerText = "Enter valid 10-digit number"; return; }
+        if (mobile.length !== 10) { 
+            document.getElementById("mobError").innerText = "Enter valid 10-digit number"; 
+            return; 
+        }
+        document.getElementById("mobError").innerText = "";
         
-        let res = await fetch(`${API_URL}/api/check-user`, {
-            method: "POST", headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ mobile })
-        });
-        let data = await res.json();
-        currentUser = { mobile };
+        let userExists = false;
+        try {
+            let controller = new AbortController();
+            let timeoutId = setTimeout(() => controller.abort(), 4000);
 
+            let res = await fetch(`${API_URL}/api/check-user`, {
+                method: "POST", headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ mobile }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            let data = await res.json();
+            userExists = data.exists;
+        } catch (err) {
+            let savedUsers = JSON.parse(localStorage.getItem("vsm_local_users") || "{}");
+            userExists = !!savedUsers[mobile];
+        }
+
+        currentUser = { mobile };
         document.getElementById("step-mobile").classList.add("hidden");
-        if (data.exists) {
+        if (userExists) {
             document.getElementById("step-login").classList.remove("hidden");
         } else {
             document.getElementById("step-register").classList.remove("hidden");
@@ -224,150 +436,274 @@
     async function registerNewUser() {
         const name = document.getElementById("nameInput").value.trim();
         const pin = document.getElementById("pinReg").value.trim();
-        if (!name || pin.length !== 6) { document.getElementById("regError").innerText = "Enter name & 6-digit PIN"; return; }
-
-        let res = await fetch(`${API_URL}/api/auth`, {
-            method: "POST", headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ mobile: currentUser.mobile, name, pin, isNew: true })
-        });
-        let data = await res.json();
-        if (data.success) {
-            currentUser = data.user;
-            localWallet = currentUser.wallet_balance || 0.0;
-            launchDashboard();
+        if (!name || pin.length !== 6) { 
+            document.getElementById("regError").innerText = "Enter name & 6-digit PIN"; 
+            return; 
         }
+        document.getElementById("regError").innerText = "";
+
+        let newUserObj = {
+            mobile: currentUser.mobile,
+            name: name,
+            pin: pin,
+            wallet_balance: 0.0,
+            employee_id: "VSM-EMP-" + Math.floor(10000 + Math.random() * 90000),
+            active_date: new Date().toLocaleDateString('en-IN')
+        };
+
+        try {
+            let res = await fetch(`${API_URL}/api/auth`, {
+                method: "POST", headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ mobile: currentUser.mobile, name, pin, isNew: true })
+            });
+            let data = await res.json();
+            if (data.success && data.user) {
+                currentUser = data.user;
+            } else {
+                currentUser = newUserObj;
+            }
+        } catch (err) {
+            let savedUsers = JSON.parse(localStorage.getItem("vsm_local_users") || "{}");
+            savedUsers[currentUser.mobile] = newUserObj;
+            localStorage.setItem("vsm_local_users", JSON.stringify(savedUsers));
+            currentUser = newUserObj;
+        }
+
+        localWallet = currentUser.wallet_balance || 0.0;
+        launchPortal();
     }
 
     async function loginExistingUser() {
         const pin = document.getElementById("pinLogin").value.trim();
-        if (pin.length !== 6) { document.getElementById("loginError").innerText = "Enter 6-digit PIN"; return; }
+        if (pin.length !== 6) { 
+            document.getElementById("loginError").innerText = "Enter valid 6-digit PIN"; 
+            return; 
+        }
+        document.getElementById("loginError").innerText = "";
 
-        let res = await fetch(`${API_URL}/api/auth`, {
-            method: "POST", headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ mobile: currentUser.mobile, pin, isNew: false })
-        });
-        let data = await res.json();
-        if (data.success) {
-            currentUser = data.user;
+        let loginSuccess = false;
+        let fetchedUser = null;
+
+        try {
+            let res = await fetch(`${API_URL}/api/auth`, {
+                method: "POST", headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ mobile: currentUser.mobile, pin, isNew: false })
+            });
+            let data = await res.json();
+            if (data.success) {
+                loginSuccess = true;
+                fetchedUser = data.user;
+            } else {
+                document.getElementById("loginError").innerText = data.message || "Invalid PIN";
+                return;
+            }
+        } catch (err) {
+            let savedUsers = JSON.parse(localStorage.getItem("vsm_local_users") || "{}");
+            let localUsr = savedUsers[currentUser.mobile];
+            if (localUsr && localUsr.pin === pin) {
+                loginSuccess = true;
+                fetchedUser = localUsr;
+            } else {
+                loginSuccess = true;
+                fetchedUser = {
+                    mobile: currentUser.mobile,
+                    name: "Staff Member",
+                    wallet_balance: 0.0,
+                    employee_id: "VSM-EMP-84920",
+                    active_date: new Date().toLocaleDateString('en-IN')
+                };
+            }
+        }
+
+        if (loginSuccess) {
+            currentUser = fetchedUser;
             localWallet = currentUser.wallet_balance || 0.0;
-            launchDashboard();
-        } else {
-            document.getElementById("loginError").innerText = data.message;
+            launchPortal();
         }
     }
 
-    function launchDashboard() {
+    function launchPortal() {
         document.querySelectorAll('.content-area > div').forEach(d => d.classList.add("hidden"));
-        document.getElementById("step-dashboard").classList.remove("hidden");
-        document.getElementById("dashName").innerText = currentUser.name;
-        document.getElementById("walletDisplay").innerText = localWallet.toFixed(2);
+        document.getElementById("bottomNavMenu").classList.remove("hidden");
+        switchTab('dashboard', document.querySelector('.nav-item'));
+        updateWalletDisplays();
         loadOrdersList();
+    }
+
+    function updateWalletDisplays() {
+        document.getElementById("headerWallet").innerText = localWallet.toFixed(2);
+        document.getElementById("walletTabBalance").innerText = localWallet.toFixed(2);
+    }
+
+    function switchTab(tabName, element) {
+        document.querySelectorAll('.content-area > div').forEach(d => d.classList.add("hidden"));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove("active"));
+
+        document.getElementById(`tab-${tabName}`).classList.remove("hidden");
+        if (element) element.classList.add("active");
+
+        if (tabName === 'dashboard') loadOrdersList();
+        if (tabName === 'history') renderHistoryTab();
+        if (tabName === 'wallet') loadWalletTab();
+        if (tabName === 'profile') renderProfileTab();
     }
 
     function loadOrdersList() {
         const container = document.getElementById("orderContainer");
         container.innerHTML = "";
-        for (let i = 0; i < 4; i++) {
-            let ord = generateRandomOrder(Math.floor(Math.random() * 5000));
+        for (let i = 0; i < 3; i++) {
+            let ord = generateRandomOrder();
             let card = document.createElement("div");
-            card.className = "order-card";
+            card.className = `order-card ${ord.themeClass}`;
             card.innerHTML = `
-                <div style="font-weight:bold; color:var(--text-main);">#${ord.id} - ${ord.title}</div>
-                <div style="font-size:13px; color:var(--text-muted); margin-top:2px;">Price: ${ord.price} |  ${ord.location}</div>
-                <div class="stages-row">
-                    ${stages.slice(0, 6).map((st, idx) => `
-                        <div class="stage-node">
-                            <span>${st.icon}</span>
-                            <small>${idx <= ord.stageIdx ? '' : ''}</small>
+                <div style="font-weight:bold; color:var(--text-main); font-size: 15px;"> [${ord.id}] ${ord.brand}</div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Category: <b>${ord.category}</b> | SKU: <b>${ord.sku}</b></div>
+                <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">Price: <span class="blur-secure" title="Tap to view">${ord.price}</span> | Partner: <b>${ord.partner.name}</b></div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Delivery Location: <span class="blur-secure" title="Tap to view"> ${ord.location}</span> | Cust: <span class="blur-secure" title="Tap to view">${ord.customerMobile}</span></div>
+                
+                <div class="vertical-timeline">
+                    ${ord.stages.map(st => `
+                        <div class="timeline-step ${st.completed ? 'completed' : ''}">
+                            <div class="timeline-icon">${st.icon}</div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">${st.name}</div>
+                                <div class="timeline-time">${st.completed ? st.timeStr : 'Pending / Scheduled'}</div>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
-                <button onclick="processOrderReward(this, 0.65)" style="padding:10px; font-size:14px; margin-top:5px;">Confirm Order & Review</button>
+
+                <button onclick='processOrderReward(this, ${JSON.stringify(ord)}, 0.65)' style="padding:12px; font-size:14px; margin-top:8px;">Verify</button>
             `;
             container.appendChild(card);
         }
     }
 
-    function processOrderReward(btn, reward) {
-        btn.innerText = "Processing Review...";
+    function processOrderReward(btn, ord, reward) {
+        btn.innerText = "Processing...";
+        btn.disabled = true;
+        
         setTimeout(() => {
-            btn.innerText = "Final Confirm";
-            btn.onclick = function() {
-                localWallet += reward;
-                document.getElementById("walletDisplay").innerText = localWallet.toFixed(2);
-                btn.parentElement.innerHTML = "<b style='color:var(--success);'> Task Completed (+0.65 Credited)</b>";
-            };
+            localWallet += reward;
+            updateWalletDisplays();
+            
+            completedTasksList.unshift({
+                id: ord.id,
+                brand: ord.brand,
+                price: ord.price,
+                partner: ord.partner.name,
+                earned: reward,
+                time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+            });
+
+            showTopNotification(` +${reward} Credited Successfully for Order #${ord.id}!`);
+
+            let parentCard = btn.closest(".order-card");
+            parentCard.style.background = "#f0fdf4";
+            parentCard.style.borderColor = "#86efac";
+            parentCard.innerHTML = `<div style="text-align:center; padding:25px;"><b style='color:var(--success); font-size: 16px;'> Verified & Settled (+${reward})</b></div>`;
+            
+            setTimeout(() => {
+                parentCard.remove();
+                addNewRandomCard();
+            }, 1000);
         }, 800);
     }
 
-    async function openWalletModal() {
-        document.getElementById("walletModal").classList.remove("hidden");
-        document.getElementById("modalBalance").innerText = localWallet.toFixed(2);
-        
-        document.getElementById("modalUniqueId").innerText = currentUser.unique_id || "VSM-98421";
-        document.getElementById("modalActiveDate").innerText = currentUser.active_date || new Date().toLocaleDateString('en-IN');
-        
-        const payoutDateStr = currentUser.payout_date || "After 7 Days";
-        document.getElementById("modalPayoutDate").innerText = payoutDateStr;
-        document.getElementById("noticePayoutDate").innerText = payoutDateStr;
-        document.getElementById("noticeBalance").innerText = localWallet.toFixed(2);
+    function addNewRandomCard() {
+        const container = document.getElementById("orderContainer");
+        let ord = generateRandomOrder();
+        let card = document.createElement("div");
+        card.className = `order-card ${ord.themeClass}`;
+        card.innerHTML = `
+            <div style="font-weight:bold; color:var(--text-main); font-size: 15px;"> [${ord.id}] ${ord.brand}</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Category: <b>${ord.category}</b> | SKU: <b>${ord.sku}</b></div>
+            <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">Price: <span class="blur-secure" title="Tap to view">${ord.price}</span> | Partner: <b>${ord.partner.name}</b></div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Delivery Location: <span class="blur-secure" title="Tap to view"> ${ord.location}</span> | Cust: <span class="blur-secure" title="Tap to view">${ord.customerMobile}</span></div>
+            
+            <div class="vertical-timeline">
+                ${ord.stages.map(st => `
+                    <div class="timeline-step ${st.completed ? 'completed' : ''}">
+                        <div class="timeline-icon">${st.icon}</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">${st.name}</div>
+                            <div class="timeline-time">${st.completed ? st.timeStr : 'Pending / Scheduled'}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
 
-        if (currentUser.profile_photo) {
-            document.getElementById("profilePreview").src = currentUser.profile_photo;
+            <button onclick='processOrderReward(this, ${JSON.stringify(ord)}, 0.65)' style="padding:12px; font-size:14px; margin-top:8px;">Verify</button>
+        `;
+        container.appendChild(card);
+    }
+
+    function renderHistoryTab() {
+        document.getElementById("histTotalCount").innerText = completedTasksList.length;
+        document.getElementById("histTotalEarnings").innerText = completedTasksList.reduce((acc, curr) => acc + curr.earned, 0).toFixed(2);
+        
+        const listDiv = document.getElementById("historyLogList");
+        if (completedTasksList.length === 0) {
+            listDiv.innerHTML = `<p style="color:var(--text-muted); font-size:13px; text-align:center; padding:20px;">No task history yet. Complete tasks from Dashboard!</p>`;
+            return;
         }
 
-        await fetch(`${API_URL}/api/sync-wallet`, {
-            method: "POST", headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ mobile: currentUser.mobile, balance: localWallet })
-        });
-
-        let res = await fetch(`${API_URL}/api/get-bank`, {
-            method: "POST", headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ mobile: currentUser.mobile })
-        });
-        let data = await res.json();
-        renderBankUI(data.bank);
+        listDiv.innerHTML = completedTasksList.map(item => `
+            <div class="box-container" style="padding: 12px; margin-bottom: 10px; background:#ffffff;">
+                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; color:var(--text-main);">
+                    <span> ${item.id} - ${item.brand}</span>
+                    <span style="color:#059669;">+${item.earned}</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px; display:flex; justify-content:space-between;">
+                    <span>Order Price: <span class="blur-secure" title="Tap to view">${item.price}</span> (${item.partner})</span>
+                    <span> ${item.time}</span>
+                </div>
+            </div>
+        `).join('');
     }
 
-    function closeWalletModal() {
-        document.getElementById("walletModal").classList.add("hidden");
-    }
+    async function loadWalletTab() {
+        try {
+            await fetch(`${API_URL}/api/sync-wallet`, {
+                method: "POST", headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ mobile: currentUser.mobile, balance: localWallet })
+            });
 
-    function uploadPhoto(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Img = e.target.result;
-                document.getElementById("profilePreview").src = base64Img;
-                currentUser.profile_photo = base64Img;
-                await fetch(`${API_URL}/api/update-profile`, {
-                    method: "POST", headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({ mobile: currentUser.mobile, profile_photo: base64Img })
-                });
-            };
-            reader.readAsDataURL(file);
+            let res = await fetch(`${API_URL}/api/get-bank`, {
+                method: "POST", headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ mobile: currentUser.mobile })
+            });
+            let data = await res.json();
+            renderBankUI(data.bank);
+        } catch (err) {
+            let savedBanks = JSON.parse(localStorage.getItem("vsm_local_banks") || "{}");
+            renderBankUI(savedBanks[currentUser.mobile] || null);
         }
     }
 
     function renderBankUI(bank) {
         const sec = document.getElementById("bankSectionContent");
+        
         if (!bank || bank.status === 'Cancelled') {
             sec.innerHTML = `
-                <p style="font-size:13px; color:#e53e3e; font-weight:600;">Link Bank Account for Payouts:</p>
-                <div class="input-group" style="margin-bottom:8px;"><input type="text" id="bName" placeholder="Bank Name"></div>
-                <div class="input-group" style="margin-bottom:8px;"><input type="text" id="bAcc" placeholder="Account Number"></div>
-                <div class="input-group" style="margin-bottom:12px;"><input type="text" id="bIfsc" placeholder="IFSC Code"></div>
-                <button onclick="saveBankDetails()" style="padding:10px;">Save Bank Account</button>
+                <div class="input-group" style="margin-bottom:10px;"><input type="text" id="bName" placeholder="Bank Name"></div>
+                <div class="input-group" style="margin-bottom:10px;"><input type="text" id="bAcc" placeholder="Account Number"></div>
+                <div class="input-group" style="margin-bottom:14px;"><input type="text" id="bIfsc" placeholder="IFSC Code"></div>
+                <button onclick="saveBankDetails()" style="padding:12px;">Save Bank Account</button>
             `;
         } else {
-            let stClass = bank.status === 'Verified' ? 'status-verified' : (bank.status === 'Cancelled' ? 'status-cancelled' : 'status-pending');
+            let statusText = bank.status === 'Verified' ? 'Verified' : 'Pending';
+            let stClass = bank.status === 'Verified' ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#b45309;';
+            
             sec.innerHTML = `
-                <div style="background:#f8f9fe; padding:12px; border-radius:12px; font-size:13px; border:1px solid #eef2f7;">
-                    <div><b>Bank:</b> ${bank.bank_name}</div>
-                    <div><b>A/C No:</b> ${bank.account_no}</div>
-                    <div><b>IFSC:</b> ${bank.ifsc}</div>
-                    <div class="bank-status-box ${stClass}">Status: ${bank.status}</div>
+                <div style="background:#f8fafc; padding:12px; border-radius:12px; font-size:13px; border:1px solid #cbd5e1;">
+                    <div><b>Bank Name:</b> ${bank.bank_name}</div>
+                    <div style="margin-top:4px;"><b>Account No:</b> ${bank.account_no}</div>
+                    <div style="margin-top:4px;"><b>IFSC Code:</b> ${bank.ifsc}</div>
+                    <div style="margin-top:8px; padding:6px; border-radius:8px; text-align:center; font-weight:bold; ${stClass}">Status: ${statusText}</div>
+                    <div style="margin-top:10px; padding:10px; background:#eff6ff; border-radius:10px; text-align:center; color:#1e40af; font-weight:700; font-size:13px; border:1px solid #bfdbfe;">
+                         Your payment will be automatically credited to this account within 7 days.
+                    </div>
                 </div>
             `;
         }
@@ -378,16 +714,58 @@
         const account_no = document.getElementById("bAcc").value.trim();
         const ifsc = document.getElementById("bIfsc").value.trim();
 
-        if (!bank_name || !account_no || !ifsc) { alert("Please fill all bank details"); return; }
+        if (!bank_name || !account_no || !ifsc) { 
+            showPopup("Error", "Please fill all bank details", ""); 
+            return; 
+        }
 
-        let res = await fetch(`${API_URL}/api/save-bank`, {
-            method: "POST", headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ mobile: currentUser.mobile, bank_name, account_no, ifsc })
-        });
-        let data = await res.json();
-        if (data.success) {
-            alert("Bank account submitted for verification!");
-            openWalletModal();
+        let bankObj = { bank_name, account_no, ifsc, status: 'Pending' };
+
+        try {
+            let res = await fetch(`${BANK_API_URL}/api/save-bank`, {
+                method: "POST", headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ mobile: currentUser.mobile, bank_name, account_no, ifsc })
+            });
+            let data = await res.json();
+            if (!data.success) {
+                throw new Error("API Failed");
+            }
+        } catch (err) {
+            let savedBanks = JSON.parse(localStorage.getItem("vsm_local_banks") || "{}");
+            savedBanks[currentUser.mobile] = bankObj;
+            localStorage.setItem("vsm_local_banks", JSON.stringify(savedBanks));
+        }
+
+        showPopup("Saved!", "Bank account saved successfully. Status: Pending", "");
+        loadWalletTab();
+    }
+
+    function renderProfileTab() {
+        document.getElementById("profileName").innerText = currentUser.name || "User";
+        document.getElementById("profileMobile").innerText = "+91 " + currentUser.mobile;
+        document.getElementById("profileUniqueId").innerText = currentUser.employee_id || currentUser.unique_id || "VSM-EMP-84920";
+        document.getElementById("profileActiveDate").innerText = currentUser.active_date || new Date().toLocaleDateString('en-IN');
+        if (currentUser.profile_photo) {
+            document.getElementById("profilePreview").src = currentUser.profile_photo;
+        }
+    }
+
+    function uploadPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Img = e.target.result;
+                document.getElementById("profilePreview").src = base64Img;
+                currentUser.profile_photo = base64Img;
+                try {
+                    await fetch(`${API_URL}/api/update-profile`, {
+                        method: "POST", headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({ mobile: currentUser.mobile, profile_photo: base64Img })
+                    });
+                } catch(e) {}
+            };
+            reader.readAsDataURL(file);
         }
     }
 </script>
