@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VSM Admin Portal - User Management</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #db2777;
+            --success: #059669;
+            --bg-gradient: linear-gradient(135deg, #4f46e5, #9333ea, #db2777);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #090d16, #1e1b4b);
+            margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+        }
+        .app-container {
+            width: 100%; max-width: 440px; background: #f8fafc; min-height: 100vh;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+            box-sizing: border-box; position: relative; overflow-x: hidden;
+        }
+        @media(min-width: 450px) {
+            .app-container { height: 900px; border-radius: 36px; border: 10px solid #334155; }
+        }
+        
+        /* Top Header */
+        .top-header-bar {
+            background: var(--bg-gradient); color: white; padding: 16px; text-align: center;
+            font-size: 16px; font-weight: 800; box-shadow: 0 4px 15px rgba(219, 39, 119, 0.3);
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        .content-area { padding: 16px; flex: 1; overflow-y: auto; padding-bottom: 30px; }
+
+        /* Stats Box */
+        .stats-box {
+            background: linear-gradient(135deg, #ede9fe, #fce7f3); border: 2px solid #f472b6;
+            border-radius: 20px; padding: 16px; text-align: center; margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(219, 39, 119, 0.1);
+        }
+
+        /* Refresh Time Info */
+        .time-info-box {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: var(--text-muted);
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .time-info-box b { color: var(--text-main); }
+
+        /* User Card */
+        .user-card {
+            background: #ffffff; border: 2px solid #e2e8f0; border-radius: 18px;
+            padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            cursor: pointer; transition: all 0.2s ease; position: relative;
+        }
+        .user-card:hover { border-color: var(--secondary); transform: translateY(-2px); }
+        
+        .user-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-name { font-size: 15px; font-weight: 700; color: var(--text-main); }
+        .user-mobile { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .wallet-badge { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 800; }
+
+        /* Expanded Details inside Card */
+        .user-details-panel {
+            margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1;
+            font-size: 13px; color: var(--text-muted); display: none;
+        }
+        .user-card.active .user-details-panel { display: block; }
+        
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .detail-row b { color: var(--text-main); }
+
+        .no-data { text-align: center; color: var(--text-muted); padding: 30px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- TOP HEADER -->
+    <div class="top-header-bar">
+        👑 VSM Admin Control Panel
+    </div>
+
+    <div class="content-area">
+        <!-- STATS -->
+        <div class="stats-box">
+            <div style="font-size: 13px; color: #831843; font-weight: bold;">Total Registered Users</div>
+            <div style="font-size: 28px; font-weight: 900; color: var(--secondary); margin-top: 4px;" id="totalUsersCount">0</div>
+        </div>
+
+        <!-- REFRESH TIME INFO -->
+        <div class="time-info-box">
+            <div>🕒 Last: <b id="lastRefreshTime">--:--</b></div>
+            <div>⏳ Next: <b id="nextRefreshTime">--:--</b></div>
+        </div>
+
+        <!-- USER LIST CART CONTAINER -->
+        <div id="adminUserList">
+            <div class="no-data">Loading users data...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Updated Worker URL
+    const API_URL = "https://shy-base-42c7.sumankkuuyy.workers.dev";
+    const STORAGE_KEY = "vsm_admin_cached_users";
+    const REFRESH_INTERVAL_MS = 3600000; // 1 Ghanta (1 Hour)
+
+    async function loadAdminData(isBackground = false) {
+        const listContainer = document.getElementById("adminUserList");
+
+        // 1. Pehle Cached data dikhao taaki turant load ho jaye (Bina database par load daale)
+        let cachedData = localStorage.getItem(STORAGE_KEY);
+        if (cachedData && !isBackground) {
+            renderUsers(JSON.parse(cachedData));
+        }
+
+        // 2. Worker se naya data fetch karo
+        try {
+            let res = await fetch(`${API_URL}/api/admin/users`);
+            let data = await res.json();
+            if (data && data.users) {
+                let users = data.users;
+                // Local storage mein save kar lo
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+                renderUsers(users);
+                updateRefreshTimestamps();
+            }
+        } catch (err) {
+            if (!cachedData) {
+                let localUsrs = JSON.parse(localStorage.getItem("vsm_local_users") || "{}");
+                let localBanks = JSON.parse(localStorage.getItem("vsm_local_banks") || "{}");
+                
+                let fallbackUsers = Object.keys(localUsrs).map(mob => {
+                    let u = localUsrs[mob];
+                    let b = localBanks[mob] || {};
+                    return {
+                        name: u.name,
+                        mobile: u.mobile,
+                        wallet_balance: u.wallet_balance || 0.0,
+                        employee_id: u.employee_id || "VSM-EMP-84920",
+                        last_updated: u.active_date || "Just now",
+                        bank_name: b.bank_name || "Not Added",
+                        account_no: b.account_no || "N/A",
+                        ifsc: b.ifsc || "N/A",
+                        created_at: u.created_at || new Date().getTime()
+                    };
+                });
+                renderUsers(fallbackUsers);
+                updateRefreshTimestamps();
+            }
+        }
+    }
+
+    function updateRefreshTimestamps() {
+        const now = new Date();
+        const nextTime = new Date(now.getTime() + REFRESH_INTERVAL_MS);
+
+        document.getElementById("lastRefreshTime").innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById("nextRefreshTime").innerText = nextTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        localStorage.setItem("vsm_last_refresh_timestamp", now.getTime());
+    }
+
+    function renderUsers(users) {
+        const listContainer = document.getElementById("adminUserList");
+
+        // New on top (Sorting by newest/latest first)
+        users.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+
+        document.getElementById("totalUsersCount").innerText = users.length;
+
+        if (users.length === 0) {
+            listContainer.innerHTML = `<div class="no-data">Koi user registered nahi hai abhi tak.</div>`;
+            return;
+        }
+
+        // Render Cards (Upar se niche)
+        listContainer.innerHTML = users.map(u => `
+            <div class="user-card" onclick="toggleCard(this)">
+                <div class="user-card-header">
+                    <div>
+                        <div class="user-name">👤 ${u.name || 'Unnamed User'}</div>
+                        <div class="user-mobile">📱 +91 ${u.mobile}</div>
+                    </div>
+                    <div class="wallet-badge">₹${Number(u.wallet_balance || 0).toFixed(2)}</div>
+                </div>
+
+                <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">👆 Tap to view full details</div>
+
+                <!-- Expanded Details Panel inside Card -->
+                <div class="user-details-panel">
+                    <div class="detail-row"><span>🆔 Employee ID:</span> <b>${u.employee_id || 'N/A'}</b></div>
+                    <div class="detail-row"><span>🏦 Bank Name:</span> <b>${u.bank_name || 'Not Added'}</b></div>
+                    <div class="detail-row"><span>🔢 Account No:</span> <b>${u.account_no || 'N/A'}</b></div>
+                    <div class="detail-row"><span>⚡ IFSC Code:</span> <b>${u.ifsc || 'N/A'}</b></div>
+                    <div class="detail-row"><span>🕒 Last Updated:</span> <b>${u.last_updated || 'N/A'}</b></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Card expand/collapse toggle function on tap
+    function toggleCard(cardElement) {
+        cardElement.classList.toggle("active");
+    }
+
+    // Page load hote hi data run hoga
+    window.onload = () => {
+        let lastTimeStored = localStorage.getItem("vsm_last_refresh_timestamp");
+        if(lastTimeStored) {
+            let lastDate = new Date(Number(lastTimeStored));
+            let nextDate = new Date(Number(lastTimeStored) + REFRESH_INTERVAL_MS);
+            document.getElementById("lastRefreshTime").innerText = lastDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById("nextRefreshTime").innerText = nextDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        loadAdminData(false);
+        
+        // Auto Refresh every 1 Hour in background
+        setInterval(() => {
+            loadAdminData(true);
+        }, REFRESH_INTERVAL_MS);
+    };
+</script>
+
+</body>
+</html>
