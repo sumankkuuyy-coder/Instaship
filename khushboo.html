@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VSM Admin Portal - User Management</title>
+    <title>VSM Admin Portal - Unique Colorful Cards</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -27,7 +27,6 @@
             .app-container { height: 900px; border-radius: 36px; border: 10px solid #334155; }
         }
         
-        /* Top Header */
         .top-header-bar {
             background: var(--bg-gradient); color: white; padding: 16px; text-align: center;
             font-size: 16px; font-weight: 800; box-shadow: 0 4px 15px rgba(219, 39, 119, 0.3);
@@ -36,14 +35,12 @@
 
         .content-area { padding: 16px; flex: 1; overflow-y: auto; padding-bottom: 30px; }
 
-        /* Stats Box */
         .stats-box {
             background: linear-gradient(135deg, #ede9fe, #fce7f3); border: 2px solid #f472b6;
             border-radius: 20px; padding: 16px; text-align: center; margin-bottom: 12px;
             box-shadow: 0 4px 15px rgba(219, 39, 119, 0.1);
         }
 
-        /* Refresh Time Info */
         .time-info-box {
             background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
             padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: var(--text-muted);
@@ -52,30 +49,80 @@
         }
         .time-info-box b { color: var(--text-main); }
 
-        /* User Card */
+        /* Unique Rotating Card Designs & Colors */
         .user-card {
-            background: #ffffff; border: 2px solid #e2e8f0; border-radius: 18px;
-            padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-            cursor: pointer; transition: all 0.2s ease; position: relative;
+            border-radius: 20px; padding: 16px; margin-bottom: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06); cursor: pointer;
+            transition: all 0.25s ease; position: relative; border: 2px solid transparent;
         }
-        .user-card:hover { border-color: var(--secondary); transform: translateY(-2px); }
-        
+        .user-card:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(0,0,0,0.1); }
+
+        /* 5 Alag-alag Vibrant Themes */
+        .card-theme-0 { background: linear-gradient(135deg, #ffffff, #fdf2f8); border-color: #f472b6; }
+        .card-theme-1 { background: linear-gradient(135deg, #ffffff, #eff6ff); border-color: #60a5fa; }
+        .card-theme-2 { background: linear-gradient(135deg, #ffffff, #ecfdf5); border-color: #34d399; }
+        .card-theme-3 { background: linear-gradient(135deg, #ffffff, #fef3c7); border-color: #fbbf24; }
+        .card-theme-4 { background: linear-gradient(135deg, #ffffff, #f3e8ff); border-color: #c084fc; }
+
         .user-card-header {
             display: flex; justify-content: space-between; align-items: center;
         }
-        .user-name { font-size: 15px; font-weight: 700; color: var(--text-main); }
-        .user-mobile { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-        .wallet-badge { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 800; }
+        .user-name { font-size: 16px; font-weight: 800; color: var(--text-main); }
+        .user-mobile { font-size: 13px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+        
+        .wallet-badge { 
+            background: #0f172a; color: #38bdf8; padding: 6px 12px; 
+            border-radius: 14px; font-size: 14px; font-weight: 900; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
 
-        /* Expanded Details inside Card */
         .user-details-panel {
-            margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1;
+            margin-top: 14px; padding-top: 12px; border-top: 2px dashed rgba(0,0,0,0.08);
             font-size: 13px; color: var(--text-muted); display: none;
         }
         .user-card.active .user-details-panel { display: block; }
         
-        .detail-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; background: rgba(255,255,255,0.6); padding: 6px 10px; border-radius: 8px; }
         .detail-row b { color: var(--text-main); }
+
+        .status-badge {
+            padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 6px;
+        }
+        .status-verified { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fee2e2; color: #991b1b; }
+
+        .verify-btn {
+            background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; width: 100%;
+            padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px;
+            margin-top: 14px; cursor: pointer; transition: opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+        .verify-btn:hover { opacity: 0.9; }
+
+        /* Colorful Custom Dialog Overlay */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        
+        .modal-box {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            width: 85%; max-width: 340px; padding: 24px; border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 2px solid #f472b6;
+            text-align: center; transform: scale(0.8); transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+
+        .modal-title { font-size: 18px; font-weight: 800; color: #831843; margin-bottom: 8px; }
+        .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+        
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; }
+        .modal-btn-cancel { background: #e2e8f0; color: #475569; }
+        .modal-btn-confirm { background: var(--bg-gradient); color: white; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.4); }
 
         .no-data { text-align: center; color: var(--text-muted); padding: 30px; font-size: 14px; }
     </style>
@@ -83,99 +130,122 @@
 <body>
 
 <div class="app-container">
-    <!-- TOP HEADER -->
     <div class="top-header-bar">
-        👑 VSM Admin Control Panel
+        👑 VSM Admin Portal (New on Top & Multi-Color)
     </div>
 
     <div class="content-area">
-        <!-- STATS -->
         <div class="stats-box">
             <div style="font-size: 13px; color: #831843; font-weight: bold;">Total Registered Users</div>
             <div style="font-size: 28px; font-weight: 900; color: var(--secondary); margin-top: 4px;" id="totalUsersCount">0</div>
         </div>
 
-        <!-- REFRESH TIME INFO -->
         <div class="time-info-box">
-            <div>🕒 Last: <b id="lastRefreshTime">--:--</b></div>
-            <div>⏳ Next: <b id="nextRefreshTime">--:--</b></div>
+            <div>⚡ Live Sync: <b>Active</b></div>
+            <div>🕒 Updated: <b id="lastRefreshTime">--:--:--</b></div>
         </div>
 
-        <!-- USER LIST CART CONTAINER -->
         <div id="adminUserList">
             <div class="no-data">Loading users data...</div>
         </div>
     </div>
 </div>
 
+<!-- Colorful Custom Confirm Modal -->
+<div id="verifyModal" class="modal-overlay">
+    <div class="modal-box">
+        <div style="font-size: 36px; margin-bottom: 8px;">🛡️</div>
+        <div class="modal-title">Verify Account</div>
+        <div class="modal-desc" id="modalText">Kya aap is user ka account verify karna chahte hain?</div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="confirmVerifyBtn">Yes, Verify</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Updated Worker URL
-    const API_URL = "https://shy-base-42c7.sumankkuuyy.workers.dev";
-    const STORAGE_KEY = "vsm_admin_cached_users";
-    const REFRESH_INTERVAL_MS = 3600000; // 1 Ghanta (1 Hour)
+    const API_URL = "https://purple-leaf-81ce.sumankkuuyy.workers.dev";
+    const STORAGE_KEY = "vsm_admin_cached_users_v2";
+    const SYNC_INTERVAL_MS = 10000;
+    let selectedMobileForVerify = null;
+    let globalUsersList = [];
 
     async function loadAdminData(isBackground = false) {
-        const listContainer = document.getElementById("adminUserList");
-
-        // 1. Pehle Cached data dikhao taaki turant load ho jaye (Bina database par load daale)
         let cachedData = localStorage.getItem(STORAGE_KEY);
         if (cachedData && !isBackground) {
-            renderUsers(JSON.parse(cachedData));
+            globalUsersList = JSON.parse(cachedData);
+            renderUsers(globalUsersList);
         }
 
-        // 2. Worker se naya data fetch karo
         try {
             let res = await fetch(`${API_URL}/api/admin/users`);
             let data = await res.json();
             if (data && data.users) {
-                let users = data.users;
-                // Local storage mein save kar lo
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-                renderUsers(users);
-                updateRefreshTimestamps();
+                globalUsersList = data.users;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(globalUsersList));
+                renderUsers(globalUsersList);
+                updateTimestamp();
             }
         } catch (err) {
             if (!cachedData) {
-                let localUsrs = JSON.parse(localStorage.getItem("vsm_local_users") || "{}");
-                let localBanks = JSON.parse(localStorage.getItem("vsm_local_banks") || "{}");
-                
-                let fallbackUsers = Object.keys(localUsrs).map(mob => {
-                    let u = localUsrs[mob];
-                    let b = localBanks[mob] || {};
-                    return {
-                        name: u.name,
-                        mobile: u.mobile,
-                        wallet_balance: u.wallet_balance || 0.0,
-                        employee_id: u.employee_id || "VSM-EMP-84920",
-                        last_updated: u.active_date || "Just now",
-                        bank_name: b.bank_name || "Not Added",
-                        account_no: b.account_no || "N/A",
-                        ifsc: b.ifsc || "N/A",
-                        created_at: u.created_at || new Date().getTime()
-                    };
-                });
-                renderUsers(fallbackUsers);
-                updateRefreshTimestamps();
+                document.getElementById("adminUserList").innerHTML = `<div class="no-data">Failed to load data. Check connection.</div>`;
             }
         }
     }
 
-    function updateRefreshTimestamps() {
-        const now = new Date();
-        const nextTime = new Date(now.getTime() + REFRESH_INTERVAL_MS);
+    function promptVerifyUser(mobile, event) {
+        event.stopPropagation();
+        selectedMobileForVerify = mobile;
+        document.getElementById("modalText").innerHTML = `Kya aap mobile number <b style="color:#db2777;">+91 ${mobile}</b> ka account successfully verify karna chahte hain?`;
+        document.getElementById("verifyModal").classList.add("show");
+    }
 
+    function closeModal() {
+        document.getElementById("verifyModal").classList.remove("show");
+        selectedMobileForVerify = null;
+    }
+
+    document.getElementById("confirmVerifyBtn").onclick = async function() {
+        if (!selectedMobileForVerify) return;
+        let mobile = selectedMobileForVerify;
+        closeModal();
+
+        globalUsersList = globalUsersList.map(u => {
+            if (u.mobile === mobile) {
+                u.bank_status = 'Verified';
+                u.id_status = 'Active';
+            }
+            return u;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(globalUsersList));
+        renderUsers(globalUsersList);
+
+        try {
+            let res = await fetch(`${API_URL}/api/admin/verify-user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mobile: mobile })
+            });
+            let result = await res.json();
+            if(!result.success) {
+                alert("Server update warning: " + (result.error || "Kuch gadbad ho gayi"));
+            }
+        } catch(err) {
+            console.error("Network error during verification:", err);
+        }
+    };
+
+    function updateTimestamp() {
+        const now = new Date();
         document.getElementById("lastRefreshTime").innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        document.getElementById("nextRefreshTime").innerText = nextTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        localStorage.setItem("vsm_last_refresh_timestamp", now.getTime());
     }
 
     function renderUsers(users) {
         const listContainer = document.getElementById("adminUserList");
-
-        // New on top (Sorting by newest/latest first)
+        
+        // New on top sorting (sabse naya user sabse upar dikhega)
         users.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
-
         document.getElementById("totalUsersCount").innerText = users.length;
 
         if (users.length === 0) {
@@ -183,52 +253,52 @@
             return;
         }
 
-        // Render Cards (Upar se niche)
-        listContainer.innerHTML = users.map(u => `
-            <div class="user-card" onclick="toggleCard(this)">
-                <div class="user-card-header">
-                    <div>
-                        <div class="user-name">👤 ${u.name || 'Unnamed User'}</div>
-                        <div class="user-mobile">📱 +91 ${u.mobile}</div>
+        const themes = ['card-theme-0', 'card-theme-1', 'card-theme-2', 'card-theme-3', 'card-theme-4'];
+
+        listContainer.innerHTML = users.map((u, index) => {
+            let isVerified = u.bank_status === 'Verified';
+            let statusBadge = isVerified 
+                ? `<span class="status-badge status-verified">Verified</span>` 
+                : `<span class="status-badge status-pending">Pending</span>`;
+
+            // Har card ko alag-alag design/colour dene ke liye theme rotate hogi
+            let themeClass = themes[index % themes.length];
+
+            return `
+                <div class="user-card ${themeClass}" onclick="toggleCard(this)">
+                    <div class="user-card-header">
+                        <div>
+                            <div class="user-name">👤 ${u.name || 'Unnamed User'} ${statusBadge}</div>
+                            <div class="user-mobile">📱 +91 ${u.mobile}</div>
+                        </div>
+                        <div class="wallet-badge">₹${Number(u.wallet_balance || 0).toFixed(2)}</div>
                     </div>
-                    <div class="wallet-badge">₹${Number(u.wallet_balance || 0).toFixed(2)}</div>
-                </div>
 
-                <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">👆 Tap to view full details</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 8px; font-weight: 600;">👆 Click to view full details</div>
 
-                <!-- Expanded Details Panel inside Card -->
-                <div class="user-details-panel">
-                    <div class="detail-row"><span>🆔 Employee ID:</span> <b>${u.employee_id || 'N/A'}</b></div>
-                    <div class="detail-row"><span>🏦 Bank Name:</span> <b>${u.bank_name || 'Not Added'}</b></div>
-                    <div class="detail-row"><span>🔢 Account No:</span> <b>${u.account_no || 'N/A'}</b></div>
-                    <div class="detail-row"><span>⚡ IFSC Code:</span> <b>${u.ifsc || 'N/A'}</b></div>
-                    <div class="detail-row"><span>🕒 Last Updated:</span> <b>${u.last_updated || 'N/A'}</b></div>
+                    <div class="user-details-panel">
+                        <div class="detail-row"><span>🆔 Employee ID:</span> <b>${u.employee_id || 'N/A'}</b></div>
+                        <div class="detail-row"><span>🏦 Bank Name:</span> <b>${u.bank_name || 'Not Added'}</b></div>
+                        <div class="detail-row"><span>🔢 Account No:</span> <b>${u.account_no || 'N/A'}</b></div>
+                        <div class="detail-row"><span>⚡ IFSC Code:</span> <b>${u.ifsc || 'N/A'}</b></div>
+                        <div class="detail-row"><span>🕒 Last Updated:</span> <b>${u.last_updated || 'N/A'}</b></div>
+                        
+                        ${!isVerified ? `<button class="verify-btn" onclick="promptVerifyUser('${u.mobile}', event)">✅ Verify Account Now</button>` : `<div style="text-align:center; color: #059669; font-weight:900; margin-top:12px; font-size:14px; background:#d1fae5; padding:8px; border-radius:8px;">✔ Account is Verified</div>`}
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    // Card expand/collapse toggle function on tap
     function toggleCard(cardElement) {
         cardElement.classList.toggle("active");
     }
 
-    // Page load hote hi data run hoga
     window.onload = () => {
-        let lastTimeStored = localStorage.getItem("vsm_last_refresh_timestamp");
-        if(lastTimeStored) {
-            let lastDate = new Date(Number(lastTimeStored));
-            let nextDate = new Date(Number(lastTimeStored) + REFRESH_INTERVAL_MS);
-            document.getElementById("lastRefreshTime").innerText = lastDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById("nextRefreshTime").innerText = nextDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
         loadAdminData(false);
-        
-        // Auto Refresh every 1 Hour in background
         setInterval(() => {
             loadAdminData(true);
-        }, REFRESH_INTERVAL_MS);
+        }, SYNC_INTERVAL_MS);
     };
 </script>
 
