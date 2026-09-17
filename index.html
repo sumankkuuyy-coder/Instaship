@@ -122,6 +122,37 @@
         .nav-item span { font-size: 22px; display: block; margin-bottom: 2px; }
         .nav-item.active { color: var(--secondary); }
 
+        /* Floating Customer Support Button */
+        .support-float-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #0088cc, #229ed9);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.4);
+            cursor: pointer;
+            z-index: 1100;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            text-decoration: none;
+        }
+        .support-float-btn:hover {
+            transform: scale(1.1);
+            filter: brightness(1.1);
+        }
+
+        @media(min-width: 450px) {
+            .support-float-btn {
+                right: calc(50% - 210px);
+            }
+        }
+
         /* Modal */
         .modal {
             position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.8);
@@ -147,25 +178,25 @@
 <div class="app-container">
     <!-- TOP HEADER -->
     <div class="top-header-bar">
-        <div id="realTimeClock"> Loading...</div>
+        <div id="realTimeClock">⏳ Loading...</div>
         <div style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px;">
-             <span id="headerWallet">0.00</span>
+            💰 ₹<span id="headerWallet">0.00</span>
         </div>
     </div>
 
     <!-- LIVE TOP NOTIFICATION BANNER -->
-    <div id="topNotification"> +0.65 Credited to Available Balance!</div>
+    <div id="topNotification">🎉 +₹0.65 Credited to Available Balance!</div>
 
     <div class="content-area" id="mainContentArea">
         <!-- STEP 1: MOBILE -->
         <div id="step-mobile">
             <div class="auth-card">
-                <h2 style="text-align:center; color: var(--secondary); margin-bottom: 20px; font-size: 26px;">VSM ERP  Portal</h2>
+                <h2 style="text-align:center; color: var(--secondary); margin-bottom: 20px; font-size: 26px;">VSM ERP Portal</h2>
                 <div class="input-group">
                     <label>Mobile Number</label>
                     <input type="tel" id="mobileInput" maxlength="10" placeholder="Enter 10-digit mobile number" inputmode="numeric" pattern="[0-9]*">
                 </div>
-                <button onclick="checkMobileNumber()">Continue </button>
+                <button onclick="checkMobileNumber()">Continue ➡️</button>
                 <div id="mobError" class="error-msg"></div>
             </div>
         </div>
@@ -173,7 +204,7 @@
         <!-- STEP 2: REGISTER -->
         <div id="step-register" class="hidden">
             <div class="auth-card">
-                <h3 style="color: var(--secondary);"> New Registration</h3>
+                <h3 style="color: var(--secondary);">📝 New Registration</h3>
                 <div class="input-group">
                     <label>Full Name</label>
                     <input type="text" id="nameInput" placeholder="Enter your full name">
@@ -190,7 +221,7 @@
         <!-- STEP 3: LOGIN -->
         <div id="step-login" class="hidden">
             <div class="auth-card">
-                <h3 style="color: var(--secondary);"> Secure Login</h3>
+                <h3 style="color: var(--secondary);">🔐 Secure Login</h3>
                 <div class="input-group">
                     <label>Enter 6-Digit PIN</label>
                     <input type="password" id="pinLogin" maxlength="6" placeholder="Enter 6-digit PIN" inputmode="numeric" pattern="[0-9]*">
@@ -203,7 +234,7 @@
         <!-- DASHBOARD TAB -->
         <div id="tab-dashboard" class="hidden">
             <div style="margin-bottom: 15px;">
-                <h3 style="margin:0; color:var(--text-main);"> Live Logistics Operations</h3>
+                <h3 style="margin:0; color:var(--text-main);">📦 Live Logistics Operations</h3>
                 <small style="color:var(--text-muted);">Verify and process automated fulfillment tasks</small>
             </div>
             <div id="orderContainer"></div>
@@ -211,10 +242,10 @@
 
         <!-- HISTORY TAB -->
         <div id="tab-history" class="hidden">
-            <h3 style="color:var(--text-main); margin-bottom:15px;"> Task Activity History</h3>
+            <h3 style="color:var(--text-main); margin-bottom:15px;">📜 Task Activity History</h3>
             <div class="box-container" style="background: linear-gradient(135deg, #ede9fe, #fce7f3); border-color:#f472b6;">
                 <div style="font-size: 14px; color: #831843; font-weight: bold;">Total order verify: <span id="histTotalCount" style="color:var(--primary); font-size:18px;">0</span></div>
-                <div style="font-size: 14px; color: #831843; font-weight: bold; margin-top:8px;">Total Earnings Made: <span id="histTotalEarnings" style="color:#059669; font-size:18px;">0.00</span></div>
+                <div style="font-size: 14px; color: #831843; font-weight: bold; margin-top:8px;">Total Earnings Made: ₹<span id="histTotalEarnings" style="color:#059669; font-size:18px;">0.00</span></div>
             </div>
             <h4 style="color:var(--text-muted); font-size:14px;">Verified Orders Log:</h4>
             <div id="historyLogList">
@@ -224,21 +255,21 @@
 
         <!-- WALLET TAB -->
         <div id="tab-wallet" class="hidden">
-            <h3 style="color:var(--text-main); margin-bottom:15px;"> My Wallet</h3>
+            <h3 style="color:var(--text-main); margin-bottom:15px;">👛 My Wallet</h3>
             <div class="box-container" style="text-align:center; background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color:#34d399;">
                 <div style="font-size: 13px; color: #065f46; font-weight: bold;">Available Balance</div>
-                <div style="font-size: 32px; font-weight: 800; color: #047857; margin: 10px 0;"><span id="walletTabBalance">0.00</span></div>
+                <div style="font-size: 32px; font-weight: 800; color: #047857; margin: 10px 0;">₹<span id="walletTabBalance">0.00</span></div>
             </div>
 
             <div class="box-container">
-                <h4 style="margin:0 0 12px 0; color:var(--secondary);"> Bank Account Details</h4>
+                <h4 style="margin:0 0 12px 0; color:var(--secondary);">🏦 Bank Account Details</h4>
                 <div id="bankSectionContent"></div>
             </div>
         </div>
 
         <!-- PROFILE TAB -->
         <div id="tab-profile" class="hidden">
-            <h3 style="color:var(--text-main); margin-bottom:15px;"> User Profile</h3>
+            <h3 style="color:var(--text-main); margin-bottom:15px;">👤 User Profile</h3>
             <div class="box-container" style="text-align:center;">
                 <img id="profilePreview" src="https://via.placeholder.com/95" class="profile-img" onclick="document.getElementById('fileInput').click()" title="Change Photo">
                 <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="uploadPhoto(event)">
@@ -248,27 +279,32 @@
             </div>
 
             <div class="box-container">
-                <div style="margin-bottom:8px;"> <b>Employee ID:</b> <span id="profileUniqueId">---</span></div>
-                <div style="margin-bottom:8px;"> <b>Account Status:</b> <span style="color: #059669; font-weight: bold;">Active</span></div>
-                <div style="margin-bottom:8px;"> <b>Joined Date:</b> <span id="profileActiveDate">---</span></div>
-                <div> <b>Payout Cycle:</b> <span style="color: #d97706; font-weight: bold;">Every 7 Days</span></div>
+                <div style="margin-bottom:8px;">🆔 <b>Employee ID:</b> <span id="profileUniqueId">---</span></div>
+                <div style="margin-bottom:8px;">🟢 <b>Account Status:</b> <span style="color: #059669; font-weight: bold;">Active</span></div>
+                <div style="margin-bottom:8px;">📅 <b>Joined Date:</b> <span id="profileActiveDate">---</span></div>
+                <div>⏱️ <b>Payout Cycle:</b> <span style="color: #d97706; font-weight: bold;">Every 7 Days</span></div>
             </div>
         </div>
     </div>
 
+    <!-- CUSTOMER SUPPORT FLOATING BUTTON -->
+    <a href="https://t.me/Instashipsupport_bot" target="_blank" class="support-float-btn" title="Customer Support">
+        💬
+    </a>
+
     <!-- FIXED BOTTOM NAVIGATION MENU WITH ICONS -->
     <div id="bottomNavMenu" class="bottom-nav hidden">
         <div class="nav-item active" onclick="switchTab('dashboard', this)">
-            <span></span>Dashboard
+            <span>📊</span>Dashboard
         </div>
         <div class="nav-item" onclick="switchTab('history', this)">
-            <span></span>History
+            <span>📜</span>History
         </div>
         <div class="nav-item" onclick="switchTab('wallet', this)">
-            <span></span>Wallet
+            <span>👛</span>Wallet
         </div>
         <div class="nav-item" onclick="switchTab('profile', this)">
-            <span></span>Profile
+            <span>👤</span>Profile
         </div>
     </div>
 </div>
@@ -276,7 +312,7 @@
 <!-- MODAL -->
 <div id="customModal" class="modal hidden">
     <div class="modal-card">
-        <div id="modalIcon" style="font-size: 48px; margin-bottom: 10px;"></div>
+        <div id="modalIcon" style="font-size: 48px; margin-bottom: 10px;">ℹ️</div>
         <h3 id="modalTitle" style="color: var(--secondary); margin-bottom: 10px;">Notice</h3>
         <p id="modalMessage" style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px; font-weight: 600;"></p>
         <button onclick="closeCustomModal()">OK</button>
@@ -293,7 +329,7 @@
 
     setInterval(() => {
         const opts = { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'medium' };
-        document.getElementById("realTimeClock").innerText = " " + new Date().toLocaleString('en-IN', opts);
+        document.getElementById("realTimeClock").innerText = "⏰ " + new Date().toLocaleString('en-IN', opts);
     }, 1000);
 
     const brands = [
@@ -318,19 +354,19 @@
     ];
 
     const masterStagesPool = [
-        {icon: "", name: "Order Placed by Customer"},
-        {icon: "", name: "Fraud & Risk Check Passed"},
-        {icon: "", name: "Payment Gateway Confirmed"},
-        {icon: "", name: "Picked & Packed at Warehouse"},
-        {icon: "", name: "Quality Control (QC) Approved"},
-        {icon: "", name: "Waybill & Shipping Label Printed"},
-        {icon: "", name: "Handed Over to Delivery Partner"},
-        {icon: "", name: "In Transit at Regional Hub"},
-        {icon: "", name: "Out for Delivery with Agent"},
-        {icon: "", name: "Delivered & Settlement Complete"},
-        {icon: "", name: "Insurance Verification Cleared"},
-        {icon: "", name: "GST E-Way Bill Generated"},
-        {icon: "", name: "Weight & Dimension Audit Passed"}
+        {icon: "📋", name: "Order Placed by Customer"},
+        {icon: "🔍", name: "Fraud & Risk Check Passed"},
+        {icon: "💳", name: "Payment Gateway Confirmed"},
+        {icon: "📦", name: "Picked & Packed at Warehouse"},
+        {icon: "⭐", name: "Quality Control (QC) Approved"},
+        {icon: "🏷️", name: "Waybill & Shipping Label Printed"},
+        {icon: "🤝", name: "Handed Over to Delivery Partner"},
+        {icon: "🚚", name: "In Transit at Regional Hub"},
+        {icon: "🛵", name: "Out for Delivery with Agent"},
+        {icon: "✅", name: "Delivered & Settlement Complete"},
+        {icon: "🛡️", name: "Insurance Verification Cleared"},
+        {icon: "📑", name: "GST E-Way Bill Generated"},
+        {icon: "⚖️", name: "Weight & Dimension Audit Passed"}
     ];
 
     const cities = [
@@ -340,7 +376,7 @@
 
     const cardThemes = ["card-theme-1", "card-theme-2", "card-theme-3", "card-theme-4", "card-theme-5"];
 
-    function showPopup(title, message, icon = "") {
+    function showPopup(title, message, icon = "ℹ️") {
         document.getElementById("modalTitle").innerText = title;
         document.getElementById("modalMessage").innerText = message;
         document.getElementById("modalIcon").innerText = icon;
@@ -556,10 +592,10 @@
             let card = document.createElement("div");
             card.className = `order-card ${ord.themeClass}`;
             card.innerHTML = `
-                <div style="font-weight:bold; color:var(--text-main); font-size: 15px;"> [${ord.id}] ${ord.brand}</div>
+                <div style="font-weight:bold; color:var(--text-main); font-size: 15px;">📦 [${ord.id}] ${ord.brand}</div>
                 <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Category: <b>${ord.category}</b> | SKU: <b>${ord.sku}</b></div>
-                <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">Price: <span class="blur-secure" title="Tap to view">${ord.price}</span> | Partner: <b>${ord.partner.name}</b></div>
-                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Delivery Location: <span class="blur-secure" title="Tap to view"> ${ord.location}</span> | Cust: <span class="blur-secure" title="Tap to view">${ord.customerMobile}</span></div>
+                <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">Price: <span class="blur-secure" title="Tap to view">₹${ord.price}</span> | Partner: <b>${ord.partner.name}</b></div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Delivery Location: <span class="blur-secure" title="Tap to view">📍 ${ord.location}</span> | Cust: <span class="blur-secure" title="Tap to view">${ord.customerMobile}</span></div>
                 
                 <div class="vertical-timeline">
                     ${ord.stages.map(st => `
@@ -596,12 +632,12 @@
                 time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
             });
 
-            showTopNotification(` +${reward} Credited Successfully for Order #${ord.id}!`);
+            showTopNotification(`🎉 +₹${reward} Credited Successfully for Order #${ord.id}!`);
 
             let parentCard = btn.closest(".order-card");
             parentCard.style.background = "#f0fdf4";
             parentCard.style.borderColor = "#86efac";
-            parentCard.innerHTML = `<div style="text-align:center; padding:25px;"><b style='color:var(--success); font-size: 16px;'> Verified & Settled (+${reward})</b></div>`;
+            parentCard.innerHTML = `<div style="text-align:center; padding:25px;"><b style='color:var(--success); font-size: 16px;'>✅ Verified & Settled (+₹${reward})</b></div>`;
             
             setTimeout(() => {
                 parentCard.remove();
@@ -616,10 +652,10 @@
         let card = document.createElement("div");
         card.className = `order-card ${ord.themeClass}`;
         card.innerHTML = `
-            <div style="font-weight:bold; color:var(--text-main); font-size: 15px;"> [${ord.id}] ${ord.brand}</div>
+            <div style="font-weight:bold; color:var(--text-main); font-size: 15px;">📦 [${ord.id}] ${ord.brand}</div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Category: <b>${ord.category}</b> | SKU: <b>${ord.sku}</b></div>
-            <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">Price: <span class="blur-secure" title="Tap to view">${ord.price}</span> | Partner: <b>${ord.partner.name}</b></div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Delivery Location: <span class="blur-secure" title="Tap to view"> ${ord.location}</span> | Cust: <span class="blur-secure" title="Tap to view">${ord.customerMobile}</span></div>
+            <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">Price: <span class="blur-secure" title="Tap to view">₹${ord.price}</span> | Partner: <b>${ord.partner.name}</b></div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Delivery Location: <span class="blur-secure" title="Tap to view">📍 ${ord.location}</span> | Cust: <span class="blur-secure" title="Tap to view">${ord.customerMobile}</span></div>
             
             <div class="vertical-timeline">
                 ${ord.stages.map(st => `
@@ -651,12 +687,12 @@
         listDiv.innerHTML = completedTasksList.map(item => `
             <div class="box-container" style="padding: 12px; margin-bottom: 10px; background:#ffffff;">
                 <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; color:var(--text-main);">
-                    <span> ${item.id} - ${item.brand}</span>
-                    <span style="color:#059669;">+${item.earned}</span>
+                    <span>✅ ${item.id} - ${item.brand}</span>
+                    <span style="color:#059669;">+₹${item.earned}</span>
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); margin-top:4px; display:flex; justify-content:space-between;">
-                    <span>Order Price: <span class="blur-secure" title="Tap to view">${item.price}</span> (${item.partner})</span>
-                    <span> ${item.time}</span>
+                    <span>Order Price: <span class="blur-secure" title="Tap to view">₹${item.price}</span> (${item.partner})</span>
+                    <span>🕒 ${item.time}</span>
                 </div>
             </div>
         `).join('');
@@ -702,7 +738,7 @@
                     <div style="margin-top:4px;"><b>IFSC Code:</b> ${bank.ifsc}</div>
                     <div style="margin-top:8px; padding:6px; border-radius:8px; text-align:center; font-weight:bold; ${stClass}">Status: ${statusText}</div>
                     <div style="margin-top:10px; padding:10px; background:#eff6ff; border-radius:10px; text-align:center; color:#1e40af; font-weight:700; font-size:13px; border:1px solid #bfdbfe;">
-                         Your payment will be automatically credited to this account within 7 days.
+                        ℹ️ Your payment will be automatically credited to this account within 7 days.
                     </div>
                 </div>
             `;
@@ -715,7 +751,7 @@
         const ifsc = document.getElementById("bIfsc").value.trim();
 
         if (!bank_name || !account_no || !ifsc) { 
-            showPopup("Error", "Please fill all bank details", ""); 
+            showPopup("Error", "Please fill all bank details", "⚠️"); 
             return; 
         }
 
@@ -736,7 +772,7 @@
             localStorage.setItem("vsm_local_banks", JSON.stringify(savedBanks));
         }
 
-        showPopup("Saved!", "Bank account saved successfully. Status: Pending", "");
+        showPopup("Saved!", "Bank account saved successfully. Status: Pending", "✅");
         loadWalletTab();
     }
 
