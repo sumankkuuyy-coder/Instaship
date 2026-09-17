@@ -3,173 +3,449 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VSM Admin Portal - Unique Colorful Cards</title>
+    <title>VSM Admin Portal - Distinct Modal Headings</title>
     <style>
         :root {
-            --primary: #4f46e5;
-            --secondary: #db2777;
-            --success: #059669;
-            --bg-gradient: linear-gradient(135deg, #4f46e5, #9333ea, #db2777);
+            --bg-main: #f1f5f9;
+            --surface: #ffffff;
+            --border-color: #cbd5e1;
             --text-main: #0f172a;
-            --text-muted: #475569;
+            --text-muted: #64748b;
+            --success-color: #16a34a;
+            --danger-color: #dc2626;
         }
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #090d16, #1e1b4b);
+            background: #cbd5e1;
             margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
         .app-container {
-            width: 100%; max-width: 440px; background: #f8fafc; min-height: 100vh;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column;
-            box-sizing: border-box; position: relative; overflow-x: hidden;
+            width: 100%; max-width: 440px; background: var(--bg-main); height: 100vh;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+            box-sizing: border-box; position: relative; overflow: hidden; color: var(--text-main);
         }
         @media(min-width: 450px) {
-            .app-container { height: 900px; border-radius: 36px; border: 10px solid #334155; }
+            .app-container { height: 900px; border-radius: 36px; border: 5px solid #ffffff; }
+        }
+
+        .content-area { 
+            padding: 16px; 
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+            box-sizing: border-box;
+        }
+
+        /* --- STICKY TOP CONTROLS --- */
+        .sticky-controls {
+            flex-shrink: 0;
+            background: var(--bg-main);
+            z-index: 40;
+            padding-bottom: 12px;
+        }
+
+        .search-box-container { margin-bottom: 10px; position: relative; }
+        #searchInput {
+            width: 100%; padding: 13px 14px 13px 38px; background: #ffffff;
+            border: 1px solid #cbd5e1; border-radius: 16px;
+            color: #0f172a; font-size: 13px; box-sizing: border-box;
+            outline: none; transition: all 0.3s ease;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+        }
+        #searchInput:focus { 
+            border-color: #2563eb; 
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+        }
+        .search-icon {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: #64748b; font-size: 14px; pointer-events: none;
+        }
+
+        .tabs-container {
+            display: flex; gap: 8px; background: #e2e8f0;
+            padding: 6px; border-radius: 16px; border: 1px solid #cbd5e1;
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        .tab-btn {
+            flex: 1; background: transparent; border: none; color: #475569;
+            padding: 10px; font-size: 12px; font-weight: 800; border-radius: 12px; cursor: pointer;
+            transition: all 0.25s ease;
         }
         
-        .top-header-bar {
-            background: var(--bg-gradient); color: white; padding: 16px; text-align: center;
-            font-size: 16px; font-weight: 800; box-shadow: 0 4px 15px rgba(219, 39, 119, 0.3);
-            position: sticky; top: 0; z-index: 50;
+        #tabPendingBtn.active {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
-        .content-area { padding: 16px; flex: 1; overflow-y: auto; padding-bottom: 30px; }
-
-        .stats-box {
-            background: linear-gradient(135deg, #ede9fe, #fce7f3); border: 2px solid #f472b6;
-            border-radius: 20px; padding: 16px; text-align: center; margin-bottom: 12px;
-            box-shadow: 0 4px 15px rgba(219, 39, 119, 0.1);
+        #tabVerifiedBtn.active {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
-        .time-info-box {
-            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
-            padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: var(--text-muted);
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        /* --- USER LIST AREA --- */
+        .user-list-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 6px 24px 6px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            perspective: 2000px;
         }
-        .time-info-box b { color: var(--text-main); }
+        .user-list-container::-webkit-scrollbar { width: 4px; }
+        .user-list-container::-webkit-scrollbar-track { background: transparent; }
+        .user-list-container::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
 
-        /* Unique Rotating Card Designs & Colors */
+        /* --- CARDS (Transparent Name & Mobile) --- */
         .user-card {
-            border-radius: 20px; padding: 16px; margin-bottom: 16px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.06); cursor: pointer;
-            transition: all 0.25s ease; position: relative; border: 2px solid transparent;
+            border-radius: 22px; 
+            padding: 18px; 
+            margin-bottom: 20px;
+            cursor: pointer; 
+            transform-style: preserve-3d;
+            transform: perspective(1200px) translateZ(0px);
+            transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.3); 
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16), 
+                        0 8px 16px rgba(0, 0, 0, 0.08), 
+                        inset 0 4px 8px rgba(255, 255, 255, 0.95),
+                        inset 0 -4px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            backface-visibility: hidden;
         }
-        .user-card:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(0,0,0,0.1); }
+        
+        .user-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.1) 45%, rgba(0, 0, 0, 0.04) 100%);
+            pointer-events: none;
+            transform: translateZ(2px);
+        }
 
-        /* 5 Alag-alag Vibrant Themes */
-        .card-theme-0 { background: linear-gradient(135deg, #ffffff, #fdf2f8); border-color: #f472b6; }
-        .card-theme-1 { background: linear-gradient(135deg, #ffffff, #eff6ff); border-color: #60a5fa; }
-        .card-theme-2 { background: linear-gradient(135deg, #ffffff, #ecfdf5); border-color: #34d399; }
-        .card-theme-3 { background: linear-gradient(135deg, #ffffff, #fef3c7); border-color: #fbbf24; }
-        .card-theme-4 { background: linear-gradient(135deg, #ffffff, #f3e8ff); border-color: #c084fc; }
+        .user-card:active { 
+            transform: perspective(1200px) scale(0.96) translateZ(-25px); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-card:hover { 
+            transform: perspective(1200px) translateY(-8px) translateZ(50px) rotateX(4deg) rotateY(-2deg); 
+            box-shadow: 0 40px 70px rgba(0, 0, 0, 0.22), 
+                        0 15px 30px rgba(0, 0, 0, 0.12),
+                        inset 0 5px 10px rgba(255, 255, 255, 1); 
+        }
 
         .user-card-header {
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;
+            transform: translateZ(20px);
         }
-        .user-name { font-size: 16px; font-weight: 800; color: var(--text-main); }
-        .user-mobile { font-size: 13px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+
+        .card-left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            margin-right: 12px;
+        }
+
+        .user-name-box {
+            background: transparent;
+            padding: 2px 0;
+            border: none;
+            box-shadow: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .user-name { font-size: 15px; font-weight: 900; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+
+        .user-mobile-box {
+            background: transparent;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+            width: fit-content;
+        }
+        .user-mobile { font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
         
         .wallet-badge { 
-            background: #0f172a; color: #38bdf8; padding: 6px 12px; 
-            border-radius: 14px; font-size: 14px; font-weight: 900; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #0f172a; 
+            padding: 10px 14px; 
+            border-radius: 16px; 
+            font-size: 13px; 
+            font-weight: 900; 
+            border: 1.5px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 
+                        inset 0 3px 6px rgba(255, 255, 255, 1);
+            transform: translateZ(35px);
+            white-space: nowrap;
         }
-
-        .user-details-panel {
-            margin-top: 14px; padding-top: 12px; border-top: 2px dashed rgba(0,0,0,0.08);
-            font-size: 13px; color: var(--text-muted); display: none;
-        }
-        .user-card.active .user-details-panel { display: block; }
-        
-        .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; background: rgba(255,255,255,0.6); padding: 6px 10px; border-radius: 8px; }
-        .detail-row b { color: var(--text-main); }
 
         .status-badge {
-            padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 6px;
+            padding: 3px 8px; border-radius: 6px; font-size: 9px; font-weight: 900; text-transform: uppercase;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.06);
         }
-        .status-verified { background: #d1fae5; color: #065f46; }
-        .status-pending { background: #fee2e2; color: #991b1b; }
+        .status-verified { background: #f0fdf4; color: #16a34a; border: 1.5px solid #16a34a; }
+        .status-pending { background: #fefce8; color: #ca8a04; border: 1.5px solid #ca8a04; }
 
         .verify-btn {
-            background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; width: 100%;
-            padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px;
-            margin-top: 14px; cursor: pointer; transition: opacity 0.2s;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); 
+            color: #ffffff; border: none; width: 100%;
+            padding: 13px; border-radius: 14px; font-weight: 900; font-size: 13px;
+            margin-top: 14px; cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 8px 22px rgba(21, 128, 61, 0.45), inset 0 2px 2px rgba(255, 255, 255, 0.5);
         }
-        .verify-btn:hover { opacity: 0.9; }
+        .verify-btn:hover { filter: brightness(1.05); transform: translateY(-2px); }
 
-        /* Colorful Custom Dialog Overlay */
+        .status-msg-green {
+            color: #16a34a; font-size: 12px; font-weight: 900;
+            text-align: center; margin-bottom: 10px; letter-spacing: 0.5px;
+        }
+        .status-msg-red {
+            color: #dc2626; font-size: 12px; font-weight: 900;
+            text-align: center; margin-bottom: 10px; letter-spacing: 0.5px;
+        }
+
+        /* --- MODAL SYSTEM --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px);
             display: flex; justify-content: center; align-items: center; z-index: 1000;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         
         .modal-box {
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            width: 85%; max-width: 340px; padding: 24px; border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 2px solid #f472b6;
-            text-align: center; transform: scale(0.8); transition: transform 0.3s ease;
+            background: #f8fafc;
+            width: 90%; max-width: 360px; padding: 20px; border-radius: 30px;
+            border: 3px solid #ffffff; color: #0f172a;
+            transform: perspective(1200px) scale(0.8) translateZ(-50px); 
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.3);
+            max-height: 88vh; overflow-y: auto; box-sizing: border-box;
+            box-shadow: 0 40px 70px rgba(0, 0, 0, 0.35), 
+                        0 20px 30px rgba(0, 0, 0, 0.15),
+                        inset 0 4px 8px rgba(255,255,255,0.95);
         }
-        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-overlay.show .modal-box { transform: perspective(1200px) scale(1) translateZ(0); }
 
-        .modal-title { font-size: 18px; font-weight: 800; color: #831843; margin-bottom: 8px; }
-        .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+        .modal-header-box {
+            background: #ffffff;
+            padding: 14px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04), inset 0 2px 4px rgba(255,255,255,0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Modal ke andar Name aur Mobile ke liye Alag-Alag Distinct Heading Style Boxes */
+        .modal-name-inner {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1.5px solid #93c5fd;
+            font-size: 15px;
+            font-weight: 900;
+            color: #1e3a8a;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1), inset 0 2px 3px rgba(255,255,255,0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-mobile-inner {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 13px;
+            font-weight: 800;
+            color: #334155;
+            letter-spacing: 0.6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04), inset 0 2px 3px rgba(255,255,255,0.9);
+            width: fit-content;
+        }
+
+        .modal-details-wrapper {
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04), inset 0 2px 4px rgba(255,255,255,0.9);
+            margin-bottom: 14px;
+        }
+
+        .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 8px; 
+            padding: 12px 14px; 
+            border-radius: 14px; 
+            font-size: 12px; 
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0; 
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .detail-row:last-child { margin-bottom: 0; }
+        .detail-row b { font-weight: 900; }
+        .cred-highlight { font-family: monospace; letter-spacing: 0.5px; }
+
+        .modal-actions { display: flex; gap: 10px; margin-top: 14px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 14px; font-weight: 900; font-size: 12px; cursor: pointer; border: none; }
         
-        .modal-actions { display: flex; gap: 10px; }
-        .modal-btn { flex: 1; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; }
-        .modal-btn-cancel { background: #e2e8f0; color: #475569; }
-        .modal-btn-confirm { background: var(--bg-gradient); color: white; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.4); }
+        .modal-btn-cancel { 
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
+            color: #ffffff; 
+            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35), inset 0 2px 2px rgba(255, 255, 255, 0.4); 
+        }
+        .modal-btn-cancel:hover { filter: brightness(1.05); }
 
-        .no-data { text-align: center; color: var(--text-muted); padding: 30px; font-size: 14px; }
+        .modal-btn-confirm { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); color: #ffffff; box-shadow: 0 6px 16px rgba(21, 128, 61, 0.35); }
+
+        .no-data { text-align: center; color: var(--text-muted); padding: 35px; font-size: 13px; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="top-header-bar">
-        👑 VSM Admin Portal (New on Top & Multi-Color)
-    </div>
-
     <div class="content-area">
-        <div class="stats-box">
-            <div style="font-size: 13px; color: #831843; font-weight: bold;">Total Registered Users</div>
-            <div style="font-size: 28px; font-weight: 900; color: var(--secondary); margin-top: 4px;" id="totalUsersCount">0</div>
+        <div class="sticky-controls">
+            <div class="search-box-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search by name or mobile..." oninput="handleSearch()">
+            </div>
+
+            <div class="tabs-container">
+                <button class="tab-btn active" id="tabPendingBtn" onclick="switchTab('Pending')">Pending (<span id="countPending">0</span>)</button>
+                <button class="tab-btn" id="tabVerifiedBtn" onclick="switchTab('Verified')">Verified (<span id="countVerified">0</span>)</button>
+            </div>
         </div>
 
-        <div class="time-info-box">
-            <div>⚡ Live Sync: <b>Active</b></div>
-            <div>🕒 Updated: <b id="lastRefreshTime">--:--:--</b></div>
-        </div>
-
-        <div id="adminUserList">
+        <div id="adminUserList" class="user-list-container">
             <div class="no-data">Loading users data...</div>
         </div>
     </div>
 </div>
 
-<!-- Colorful Custom Confirm Modal -->
-<div id="verifyModal" class="modal-overlay">
+<!-- User Detail Popup Modal -->
+<div id="userDetailModal" class="modal-overlay">
     <div class="modal-box">
-        <div style="font-size: 36px; margin-bottom: 8px;">🛡️</div>
-        <div class="modal-title">Verify Account</div>
-        <div class="modal-desc" id="modalText">Kya aap is user ka account verify karna chahte hain?</div>
+        <div class="modal-header-box">
+            <div class="modal-name-inner" id="modalUserName"></div>
+            <div class="modal-mobile-inner" id="modalUserMobile"></div>
+        </div>
+
+        <div class="modal-details-wrapper">
+            <div id="modalDetailsContainer"></div>
+        </div>
+
+        <div id="modalVerifyAction"></div>
+
         <div class="modal-actions">
-            <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
-            <button class="modal-btn modal-btn-confirm" id="confirmVerifyBtn">Yes, Verify</button>
+            <button class="modal-btn modal-btn-cancel" onclick="closeDetailModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Verify Confirm Popup Modal -->
+<div id="verifyModal" class="modal-overlay">
+    <div class="modal-box" style="text-align: center; max-width: 320px;">
+        <div style="font-size: 32px; margin-bottom: 8px; color: #16a34a; text-shadow: 0 4px 10px rgba(22,163,74,0.3);">✓</div>
+        <div style="font-size: 16px; font-weight: 900; color: #0f172a; margin-bottom: 8px;">Verify Account</div>
+        <div id="modalVerifyText" style="font-size: 12px; color: #64748b; margin-bottom: 18px; line-height: 1.5; font-weight: 800;">Kya aap is user ka account verify karna chahte hain?</div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeVerifyModal()">Cancel</button>
+            <button class="modal-btn modal-btn-confirm" id="confirmVerifyBtn">Confirm</button>
         </div>
     </div>
 </div>
 
 <script>
     const API_URL = "https://purple-leaf-81ce.sumankkuuyy.workers.dev";
-    const STORAGE_KEY = "vsm_admin_cached_users_v2";
+    const STORAGE_KEY = "vsm_admin_cached_users_v51";
     const SYNC_INTERVAL_MS = 10000;
+    
     let selectedMobileForVerify = null;
     let globalUsersList = [];
+    let currentTab = 'Pending';
+    let searchQuery = '';
+
+    const cardThemes = [
+        { bg: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)', textName: '#0369a1', textMob: '#0284c7' },
+        { bg: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #86efac 100%)', textName: '#166534', textMob: '#15803d' },
+        { bg: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)', textName: '#6b21a8', textMob: '#7e22ce' },
+        { bg: 'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%)', textName: '#9d174d', textMob: '#be185d' },
+        { bg: 'linear-gradient(135deg, #fef9c3 0%, #fde047 100%)', textName: '#854d0e', textMob: '#a16207' },
+        { bg: 'linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%)', textName: '#115e59', textMob: '#0f766e' },
+        { bg: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)', textName: '#9a3412', textMob: '#c2410c' },
+        { bg: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)', textName: '#991b1b', textMob: '#b91c1c' },
+        { bg: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)', textName: '#5b21b6', textMob: '#6d28d9' },
+        { bg: 'linear-gradient(135deg, #fae8ff 0%, #f5d0fe 100%)', textName: '#86198f', textMob: '#a21caf' },
+        { bg: 'linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%)', textName: '#155e75', textMob: '#0e7490' },
+        { bg: 'linear-gradient(135deg, #ecfccb 0%, #d9f99d 100%)', textName: '#3f6212', textMob: '#4d7c0f' },
+        { bg: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', textName: '#78350f', textMob: '#92400e' },
+        { bg: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', textName: '#334155', textMob: '#475569' },
+        { bg: 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)', textName: '#3730a3', textMob: '#4338ca' },
+        { bg: 'linear-gradient(135deg, #fbcfe8 0%, #f472b6 40%, #db2777 100%)', textName: '#831843', textMob: '#9d174d' },
+        { bg: 'linear-gradient(135deg, #a7f3d0 0%, #34d399 50%, #059669 100%)', textName: '#064e3b', textMob: '#065f46' },
+        { bg: 'linear-gradient(135deg, #bfdbfe 0%, #60a5fa 50%, #2563eb 100%)', textName: '#1e3a8a', textMob: '#1e40af' },
+        { bg: 'linear-gradient(135deg, #fde68a 0%, #fbbf24 50%, #d97706 100%)', textName: '#451a03', textMob: '#78350f' },
+        { bg: 'linear-gradient(135deg, #fed7aa 0%, #fb923c 50%, #ea580c 100%)', textName: '#431407', textMob: '#7c2d12' },
+        { bg: 'linear-gradient(135deg, #fecaca 0%, #f87171 50%, #dc2626 100%)', textName: '#450a0a', textMob: '#7f1d1d' },
+        { bg: 'linear-gradient(135deg, #e9d5ff 0%, #c084fc 50%, #9333ea 100%)', textName: '#3b0764', textMob: '#581c87' },
+        { bg: 'linear-gradient(135deg, #99f6e4 0%, #2dd4bf 50%, #0d9488 100%)', textName: '#042f2e', textMob: '#134e4a' },
+        { bg: 'linear-gradient(135deg, #bae6fd 0%, #38bdf8 50%, #0284c7 100%)', textName: '#082f49', textMob: '#0369a1' },
+        { bg: 'linear-gradient(135deg, #bbf7d0 0%, #4ade80 50%, #16a34a 100%)', textName: '#052e16', textMob: '#14532d' },
+        { bg: 'linear-gradient(135deg, #ddd6fe 0%, #818cf8 50%, #4f46e5 100%)', textName: '#1e1b4b', textMob: '#312e81' },
+        { bg: 'linear-gradient(135deg, #f5d0fe 0%, #e879f9 50%, #d946ef 100%)', textName: '#4a044e', textMob: '#701a75' },
+        { bg: 'linear-gradient(135deg, #fed7aa 0%, #f472b6 100%)', textName: '#701a75', textMob: '#831843' },
+        { bg: 'linear-gradient(135deg, #99f6e4 0%, #67e8f9 100%)', textName: '#164e63', textMob: '#155e75' },
+        { bg: 'linear-gradient(135deg, #fde047 0%, #84cc16 100%)', textName: '#365314', textMob: '#3f6212' },
+        { bg: 'linear-gradient(135deg, #fca5a5 0%, #fdba74 100%)', textName: '#7c2d12', textMob: '#9a3412' }
+    ];
+
+    const modalRowThemes = [
+        { labelColor: '#2563eb', valColor: '#0f172a' },
+        { labelColor: '#16a34a', valColor: '#0f172a' },
+        { labelColor: '#ca8a04', valColor: '#0f172a' },
+        { labelColor: '#9333ea', valColor: '#0f172a' },
+        { labelColor: '#db2777', valColor: '#0f172a' },
+        { labelColor: '#0d9488', valColor: '#0f172a' },
+        { labelColor: '#ea580c', valColor: '#0f172a' }
+    ];
+
+    function switchTab(tabName) {
+        currentTab = tabName;
+        if (tabName === 'Pending') {
+            document.getElementById('tabPendingBtn').classList.add('active');
+            document.getElementById('tabVerifiedBtn').classList.remove('active');
+        } else {
+            document.getElementById('tabVerifiedBtn').classList.add('active');
+            document.getElementById('tabPendingBtn').classList.remove('active');
+        }
+        renderUsers(globalUsersList);
+    }
+
+    function handleSearch() {
+        searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+        renderUsers(globalUsersList);
+    }
 
     async function loadAdminData(isBackground = false) {
         let cachedData = localStorage.getItem(STORAGE_KEY);
@@ -185,7 +461,6 @@
                 globalUsersList = data.users;
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(globalUsersList));
                 renderUsers(globalUsersList);
-                updateTimestamp();
             }
         } catch (err) {
             if (!cachedData) {
@@ -194,14 +469,64 @@
         }
     }
 
-    function promptVerifyUser(mobile, event) {
-        event.stopPropagation();
+    function openDetailModal(mobile) {
+        const u = globalUsersList.find(user => user.mobile === mobile);
+        if (!u) return;
+
+        let isVerified = u.bank_status === 'Verified';
+
+        document.getElementById("modalUserName").innerHTML = `<span>👤 ${u.name || 'Unnamed User'}</span>`;
+        document.getElementById("modalUserMobile").innerHTML = `<span>📞 +91 ${u.mobile}</span>`;
+
+        const rowsData = [
+            { label: '💰 Wallet Balance:', val: `₹${Number(u.wallet_balance || 0).toFixed(2)}` },
+            { label: '🔑 PIN:', val: u.pin || u.password || u.pass || 'N/A', isCred: true },
+            { label: '🆔 Employee ID:', val: u.employee_id || 'N/A' },
+            { label: '🏦 Bank Name:', val: u.bank_name || 'Not Added' },
+            { label: '🔢 Account No:', val: u.account_no || 'N/A' },
+            { label: '⚡ IFSC Code:', val: u.ifsc || 'N/A' },
+            { label: '🕒 Last Updated:', val: u.last_updated || 'N/A' }
+        ];
+
+        let detailsHtml = rowsData.map((r, i) => {
+            let theme = modalRowThemes[i % modalRowThemes.length];
+            let valClass = r.isCred ? 'cred-highlight' : '';
+            return `<div class="detail-row">
+                <span style="color: ${theme.labelColor}; font-weight: 800;">${r.label}</span> 
+                <b class="${valClass}" style="color: ${theme.valColor};">${r.val}</b>
+            </div>`;
+        }).join('');
+
+        document.getElementById("modalDetailsContainer").innerHTML = detailsHtml;
+
+        let verifyActionHtml = '';
+        if (!isVerified) {
+            verifyActionHtml = `
+                <div class="status-msg-red">Payout on hold - Please verify account</div>
+                <button class="verify-btn" onclick="promptVerifyUser('${u.mobile}')">Verify Account</button>
+            `;
+        } else {
+            verifyActionHtml = `
+                <div class="status-msg-green">Auto Settlement Active</div>
+                <div style="text-align:center; color: #16a34a; font-weight:900; margin-top:8px; font-size:12px; background:#f0fdf4; padding:9px; border-radius:10px; border: 1px solid #bbf7d0; box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);">✓ Verified Account</div>
+            `;
+        }
+        document.getElementById("modalVerifyAction").innerHTML = verifyActionHtml;
+
+        document.getElementById("userDetailModal").classList.add("show");
+    }
+
+    function closeDetailModal() {
+        document.getElementById("userDetailModal").classList.remove("show");
+    }
+
+    function promptVerifyUser(mobile) {
         selectedMobileForVerify = mobile;
-        document.getElementById("modalText").innerHTML = `Kya aap mobile number <b style="color:#db2777;">+91 ${mobile}</b> ka account successfully verify karna chahte hain?`;
+        document.getElementById("modalVerifyText").innerHTML = `Kya aap mobile number <b style="color:#0f172a;">+91 ${mobile}</b> ka account successfully verify karna chahte hain?`;
         document.getElementById("verifyModal").classList.add("show");
     }
 
-    function closeModal() {
+    function closeVerifyModal() {
         document.getElementById("verifyModal").classList.remove("show");
         selectedMobileForVerify = null;
     }
@@ -209,7 +534,8 @@
     document.getElementById("confirmVerifyBtn").onclick = async function() {
         if (!selectedMobileForVerify) return;
         let mobile = selectedMobileForVerify;
-        closeModal();
+        closeVerifyModal();
+        closeDetailModal();
 
         globalUsersList = globalUsersList.map(u => {
             if (u.mobile === mobile) {
@@ -236,62 +562,58 @@
         }
     };
 
-    function updateTimestamp() {
-        const now = new Date();
-        document.getElementById("lastRefreshTime").innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    }
-
     function renderUsers(users) {
         const listContainer = document.getElementById("adminUserList");
         
-        // New on top sorting (sabse naya user sabse upar dikhega)
         users.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
-        document.getElementById("totalUsersCount").innerText = users.length;
 
-        if (users.length === 0) {
-            listContainer.innerHTML = `<div class="no-data">Koi user registered nahi hai abhi tak.</div>`;
+        let pendingCount = users.filter(u => u.bank_status !== 'Verified').length;
+        let verifiedCount = users.filter(u => u.bank_status === 'Verified').length;
+
+        document.getElementById("countPending").innerText = pendingCount;
+        document.getElementById("countVerified").innerText = verifiedCount;
+
+        let filteredUsers = users.filter(u => {
+            let isVerified = u.bank_status === 'Verified';
+            let matchesTab = (currentTab === 'Pending') ? !isVerified : isVerified;
+            
+            let name = (u.name || '').toLowerCase();
+            let mobile = (u.mobile || '').toLowerCase();
+            let matchesSearch = name.includes(searchQuery) || mobile.includes(searchQuery);
+
+            return matchesTab && matchesSearch;
+        });
+
+        if (filteredUsers.length === 0) {
+            listContainer.innerHTML = `<div class="no-data">Koi user nahi mila.</div>`;
             return;
         }
 
-        const themes = ['card-theme-0', 'card-theme-1', 'card-theme-2', 'card-theme-3', 'card-theme-4'];
-
-        listContainer.innerHTML = users.map((u, index) => {
+        listContainer.innerHTML = filteredUsers.map((u, index) => {
             let isVerified = u.bank_status === 'Verified';
             let statusBadge = isVerified 
                 ? `<span class="status-badge status-verified">Verified</span>` 
                 : `<span class="status-badge status-pending">Pending</span>`;
 
-            // Har card ko alag-alag design/colour dene ke liye theme rotate hogi
-            let themeClass = themes[index % themes.length];
+            let theme = cardThemes[index % cardThemes.length];
 
             return `
-                <div class="user-card ${themeClass}" onclick="toggleCard(this)">
+                <div class="user-card" style="background: ${theme.bg};" onclick="openDetailModal('${u.mobile}')">
                     <div class="user-card-header">
-                        <div>
-                            <div class="user-name">👤 ${u.name || 'Unnamed User'} ${statusBadge}</div>
-                            <div class="user-mobile">📱 +91 ${u.mobile}</div>
+                        <div class="card-left-section">
+                            <div class="user-name-box">
+                                <span class="user-name" style="color: ${theme.textName};">${u.name || 'Unnamed User'}</span>
+                                ${statusBadge}
+                            </div>
+                            <div class="user-mobile-box">
+                                <div class="user-mobile" style="color: ${theme.textMob};">+91 ${u.mobile}</div>
+                            </div>
                         </div>
                         <div class="wallet-badge">₹${Number(u.wallet_balance || 0).toFixed(2)}</div>
-                    </div>
-
-                    <div style="font-size: 11px; color: #64748b; margin-top: 8px; font-weight: 600;">👆 Click to view full details</div>
-
-                    <div class="user-details-panel">
-                        <div class="detail-row"><span>🆔 Employee ID:</span> <b>${u.employee_id || 'N/A'}</b></div>
-                        <div class="detail-row"><span>🏦 Bank Name:</span> <b>${u.bank_name || 'Not Added'}</b></div>
-                        <div class="detail-row"><span>🔢 Account No:</span> <b>${u.account_no || 'N/A'}</b></div>
-                        <div class="detail-row"><span>⚡ IFSC Code:</span> <b>${u.ifsc || 'N/A'}</b></div>
-                        <div class="detail-row"><span>🕒 Last Updated:</span> <b>${u.last_updated || 'N/A'}</b></div>
-                        
-                        ${!isVerified ? `<button class="verify-btn" onclick="promptVerifyUser('${u.mobile}', event)">✅ Verify Account Now</button>` : `<div style="text-align:center; color: #059669; font-weight:900; margin-top:12px; font-size:14px; background:#d1fae5; padding:8px; border-radius:8px;">✔ Account is Verified</div>`}
                     </div>
                 </div>
             `;
         }).join('');
-    }
-
-    function toggleCard(cardElement) {
-        cardElement.classList.toggle("active");
     }
 
     window.onload = () => {
