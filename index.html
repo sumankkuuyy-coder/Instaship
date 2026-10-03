@@ -113,7 +113,7 @@
         /* FIXED Bottom Navigation Menu with Icons */
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: #ffffff;
-            border-top: 2px solid #e2e8f0; display: flex; justify-space-around; align-items: center;
+            border-top: 2px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.08); z-index: 1000; box-sizing: border-box;
         }
         .nav-item {
@@ -400,6 +400,49 @@
 
     const cardThemes = ["card-theme-1", "card-theme-2", "card-theme-3", "card-theme-4", "card-theme-5"];
 
+    /* ---------------- STORAGE & SESSION SYNC ---------------- */
+    function saveUserDataToStorage() {
+        if (!currentUser || !currentUser.mobile) return;
+        const userStorageKey = `vsm_user_store_${currentUser.mobile}`;
+        const dataToSave = {
+            user: currentUser,
+            wallet: localWallet,
+            completedTasks: completedTasksList,
+            withdrawals: withdrawalsList
+        };
+        localStorage.setItem(userStorageKey, JSON.stringify(dataToSave));
+        localStorage.setItem("vsm_active_session_mobile", currentUser.mobile);
+    }
+
+    function loadUserDataFromStorage(mobile) {
+        const userStorageKey = `vsm_user_store_${mobile}`;
+        const rawData = localStorage.getItem(userStorageKey);
+        if (rawData) {
+            try {
+                const parsed = JSON.parse(rawData);
+                currentUser = parsed.user || currentUser;
+                localWallet = typeof parsed.wallet === 'number' ? parsed.wallet : 0.0;
+                completedTasksList = parsed.completedTasks || [];
+                withdrawalsList = parsed.withdrawals || [];
+                return true;
+            } catch(e) {
+                console.error("Storage parse error", e);
+            }
+        }
+        return false;
+    }
+
+    // Auto-login check when page loads
+    window.addEventListener("DOMContentLoaded", () => {
+        const activeMobile = localStorage.getItem("vsm_active_session_mobile");
+        if (activeMobile) {
+            const success = loadUserDataFromStorage(activeMobile);
+            if (success && currentUser) {
+                launchPortal();
+            }
+        }
+    });
+
     function showPopup(title, message, icon = "ℹ️") {
         document.getElementById("modalTitle").innerText = title;
         document.getElementById("modalMessage").innerText = message;
@@ -530,6 +573,7 @@
         }
 
         localWallet = currentUser.wallet_balance || 0.0;
+        saveUserDataToStorage();
         launchPortal();
     }
 
@@ -577,7 +621,8 @@
 
         if (loginSuccess) {
             currentUser = fetchedUser;
-            localWallet = currentUser.wallet_balance || 0.0;
+            loadUserDataFromStorage(currentUser.mobile);
+            saveUserDataToStorage();
             launchPortal();
         }
     }
@@ -656,6 +701,8 @@
                 time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
             });
 
+            saveUserDataToStorage();
+
             showTopNotification(`🎉 +₹${reward} Credited Successfully for Order #${ord.id}!`);
 
             let parentCard = btn.closest(".order-card");
@@ -709,7 +756,7 @@
         }
 
         if (amount > localWallet) {
-            showPopup("Insufficient Balance", ".", "❌");
+            showPopup("Insufficient Balance", "Your available balance is insufficient.", "❌");
             return;
         }
 
@@ -728,6 +775,8 @@
         };
 
         withdrawalsList.unshift(wdObj);
+        saveUserDataToStorage();
+        
         amtInput.value = "";
 
         showTopNotification(`💸 ₹${amount.toFixed(2)} Withdrawal Request Sent!`);
@@ -871,6 +920,7 @@
                 const base64Img = e.target.result;
                 document.getElementById("profilePreview").src = base64Img;
                 currentUser.profile_photo = base64Img;
+                saveUserDataToStorage();
                 try {
                     await fetch(`${API_URL}/api/update-profile`, {
                         method: "POST", headers: {"Content-Type": "application/json"},
