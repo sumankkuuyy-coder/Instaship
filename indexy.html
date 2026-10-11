@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkHQ - Platform Fee Warning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes zoomPulse {
+            0%, 100% {
+                transform: scale(0.97);
+                box-shadow: 0 0 25px rgba(239, 68, 68, 0.35), inset 0 0 15px rgba(239, 68, 68, 0.2);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 50px rgba(239, 68, 68, 0.65), inset 0 0 25px rgba(239, 68, 68, 0.4);
+            }
+        }
+
+        .animated-dialog {
+            animation: zoomPulse 2.6s infinite ease-in-out;
+        }
+
+        @keyframes ringPulse {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.25); opacity: 0.9; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+
+        .icon-ring {
+            animation: ringPulse 2.6s infinite ease-in-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .custom-alert-anim {
+            animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0d13] text-slate-100 font-sans min-h-screen flex items-center justify-center p-2 sm:p-4">
+
+    <!-- Phone Mockup Outer Frame -->
+    <div class="w-full max-w-[390px] bg-[#121620] rounded-[48px] border-[10px] border-[#1e2330] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] overflow-hidden relative min-h-[780px] flex flex-col justify-between">
+        
+        <!-- Phone Notch / Dynamic Island -->
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-[#1e2330] rounded-b-2xl z-40 flex items-center justify-center">
+            <div class="w-3 h-3 bg-black rounded-full mr-2"></div>
+            <div class="w-10 h-1.5 bg-slate-800 rounded-full"></div>
+        </div>
+
+        <!-- Background App Dashboard (Blurred behind Popup) -->
+        <div class="pt-10 px-4 pb-4 space-y-4 filter blur-sm select-none pointer-events-none opacity-40 flex-1 flex flex-col justify-between">
+            <!-- Header -->
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex items-center space-x-2">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center font-bold text-white text-sm shadow-md">W</div>
+                    <span class="font-bold text-base tracking-wide text-slate-200">WorkHQ</span>
+                </div>
+                <div class="flex items-center space-x-3 text-slate-400">
+                    <i class="fa-solid fa-bell"></i>
+                    <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-semibold">W</div>
+                </div>
+            </div>
+
+            <!-- Status Tag -->
+            <div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                    <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Blocked
+                </span>
+            </div>
+
+            <!-- Task Cards -->
+            <div class="space-y-3">
+                <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-medium text-slate-400">Task Management Module</span>
+                        <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-slate-300">Active 2026</span>
+                    </div>
+                    <div class="h-3 bg-slate-700 rounded w-full mb-2"></div>
+                    <div class="h-3 bg-slate-700 rounded w-2/3"></div>
+                </div>
+                <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-medium text-slate-400">Client Operations Dashboard</span>
+                    </div>
+                    <div class="h-3 bg-slate-700 rounded w-4/5"></div>
+                </div>
+            </div>
+
+            <!-- Bottom Nav Bar -->
+            <div class="bg-slate-900/90 border-t border-slate-800 py-3 px-6 flex justify-between text-slate-400 text-sm rounded-2xl">
+                <div class="text-orange-500 flex flex-col items-center"><i class="fa-solid fa-house mb-1"></i><span class="text-[10px]">Home</span></div>
+                <div class="flex flex-col items-center"><i class="fa-solid fa-list-check mb-1"></i><span class="text-[10px]">Tasks</span></div>
+                <div class="flex flex-col items-center"><i class="fa-solid fa-wallet mb-1"></i><span class="text-[10px]">Wallet</span></div>
+                <div class="flex flex-col items-center"><i class="fa-solid fa-user mb-1"></i><span class="text-[10px]">Profile</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Warning Popup Modal Overlay -->
+    <div id="warningModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        
+        <!-- Animated Dialog Card -->
+        <div class="animated-dialog bg-gradient-to-b from-[#1c2230] to-[#121620] border-2 border-orange-500/70 rounded-[32px] p-6 max-w-[340px] w-full text-center relative shadow-[0_0_50px_rgba(239,68,68,0.25)]">
+            
+            <!-- Floating Animated Alert Icon Header -->
+            <div class="relative w-20 h-20 mx-auto -mt-12 mb-3 flex items-center justify-center">
+                <!-- Outer Ring Glow Pulse -->
+                <div class="absolute inset-0 rounded-full border-2 border-orange-500 icon-ring bg-orange-500/10"></div>
+                <!-- Inner Icon Circle -->
+                <div class="relative w-16 h-16 bg-[#1a1f2c] border-2 border-orange-400 rounded-full flex items-center justify-center shadow-inner">
+                    <i class="fa-solid fa-triangle-exclamation text-orange-400 text-2xl drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]"></i>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <h2 class="text-orange-400 font-extrabold text-lg tracking-wider uppercase mb-3">
+                Alert: Action Required!
+            </h2>
+
+            <!-- Main Warning Description -->
+            <p class="text-slate-300 text-xs leading-relaxed font-medium mb-3">
+                You have not completed the payment of your <span class="text-amber-400 font-bold">₹999 Platform Fee</span>. Until this payment is processed, access to work activities is <span class="text-red-400 font-bold">restricted</span>.
+            </p>
+
+            <!-- Short English Version -->
+            <div class="bg-black/30 border border-slate-700/60 rounded-xl p-2.5 mb-5 text-left">
+                <p class="text-[11px] text-slate-400 leading-snug">
+                    <strong class="text-slate-200">Short:</strong> Platform Fee (₹999) Overdue. Work Disabled. Pay Now to restore access instantly.
+                </p>
+            </div>
+
+            <!-- Payment Button -->
+            <button onclick="openQrModal()" class="w-full bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transform active:scale-95 transition duration-150 flex items-center justify-center space-x-2 text-sm tracking-wide">
+                <i class="fa-solid fa-credit-card"></i>
+                <span>PAY PLATFORM FEE (₹999)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. QR Code & Timer Modal (Hidden initially) -->
+    <div id="qrModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md hidden">
+        <div class="bg-[#161a25] border border-slate-700/80 rounded-[28px] p-5 max-w-[340px] w-full text-center relative shadow-2xl space-y-4">
+            
+            <!-- Close button -->
+            <button onclick="closeQrModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h3 class="font-bold text-base text-slate-100 pt-1">Scan QR to Pay <span class="text-amber-400">₹999</span></h3>
+
+            <!-- QR Code Image Box -->
+            <div class="bg-white p-2.5 rounded-2xl inline-block shadow-inner mx-auto border-2 border-amber-500/30">
+                <img src="https://i.ibb.co/1JKdzSWp/IMG-20261011-101429-096.jpg" alt="Payment QR Code" class="w-44 h-44 object-contain mx-auto rounded-lg">
+            </div>
+
+            <!-- Countdown Timer Box (Opposite / Decrementing) -->
+            <div class="bg-slate-900/90 rounded-2xl p-3 border border-slate-800 flex items-center justify-between px-5">
+                <div class="text-left">
+                    <p id="timerText" class="text-[11px] text-slate-400 font-medium">Time Remaining:</p>
+                    <p class="text-[10px] text-slate-500">Complete payment before timeout</p>
+                </div>
+                <div id="countdown" class="text-xl font-mono font-extrabold text-amber-400 tracking-wider">05:00</div>
+            </div>
+
+            <!-- Official Language Notice -->
+            <p class="text-[11px] text-slate-400 leading-relaxed px-1">
+                This is an automated payment system. Once the transaction is successful, workspace access will be granted instantly.
+            </p>
+
+            <!-- Action Button -->
+            <button onclick="showCustomAlert()" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold py-3 px-4 rounded-xl text-xs transition duration-150 shadow-md">
+                I Have Completed Payment
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. Custom Animated Alert Dialog (Replaces Browser Alert) -->
+    <div id="customAlertDialog" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div class="custom-alert-anim bg-[#1a202c] border border-slate-600/60 rounded-3xl p-6 max-w-[310px] w-full text-center shadow-2xl relative space-y-4">
+            
+            <!-- Icon -->
+            <div class="w-14 h-14 bg-indigo-500/20 border border-indigo-500/40 rounded-full flex items-center justify-center mx-auto text-indigo-400 text-xl shadow-inner">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+
+            <!-- Title -->
+            <h4 class="font-bold text-base text-slate-100 tracking-wide">Payment Instruction</h4>
+
+            <!-- Message -->
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Please scan the QR code using your UPI app (GPay, PhonePe, Paytm, etc.) to complete the transaction.
+            </p>
+
+            <!-- OK Button -->
+            <button onclick="closeCustomAlert()" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold py-2.5 px-4 rounded-xl text-xs shadow-md transition duration-150">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let countdownInterval;
+
+        function openQrModal() {
+            document.getElementById('warningModal').classList.add('hidden');
+            document.getElementById('qrModal').classList.remove('hidden');
+            startTimer(5 * 60); // 5 minutes in seconds
+        }
+
+        function closeQrModal() {
+            document.getElementById('qrModal').classList.add('hidden');
+            document.getElementById('warningModal').classList.remove('hidden');
+            clearInterval(countdownInterval);
+        }
+
+        function startTimer(duration) {
+            clearInterval(countdownInterval);
+            let timer = duration, minutes, seconds;
+            const display = document.getElementById('countdown');
+            const timerLabel = document.getElementById('timerText');
+
+            countdownInterval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(countdownInterval);
+                    display.textContent = "TIMEOUT";
+                    display.classList.remove('text-amber-400');
+                    display.classList.add('text-red-500', 'text-lg');
+                    timerLabel.textContent = "Session Status:";
+                }
+            }, 1000);
+        }
+
+        function showCustomAlert() {
+            document.getElementById('customAlertDialog').classList.remove('hidden');
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('customAlertDialog').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
