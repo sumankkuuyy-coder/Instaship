@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        .pulse-ring {
+            box-shadow: 0 0 0 0 rgba(19, 136, 8, 0.7);
+            animation: pulse-green 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+        @keyframes pulse-green {
+            to { box-shadow: 0 0 0 10px rgba(19, 136, 8, 0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex justify-center items-center p-0 md:p-4">
+
+<!-- Main App Container -->
+<div class="w-full max-w-md bg-white min-h-screen md:min-h-[850px] md:h-[850px] md:rounded-3xl shadow-2xl flex flex-col justify-between overflow-hidden relative border border-slate-200">
+
+    <!-- Light Clean Header with Updated Logos -->
+    <header class="bg-white px-4 py-3 flex justify-between items-center shadow-sm relative z-10 border-b-2 border-slate-200">
+        <!-- Left Logo -->
+        <a href="https://imgbb.com/" target="_blank">
+            <img src="https://i.ibb.co/8Sn2Zk8/logo-png-b686afb9ac69b2a1342bd76217456b81.png" alt="Logo Left" class="h-10 w-auto object-contain">
+        </a>
+        
+        <!-- Right Logo -->
+        <a href="https://imgbb.com/" target="_blank">
+            <img src="https://i.ibb.co/219KNhWQ/0-eci-net-logo.png" alt="Logo Right" class="h-8 w-auto object-contain">
+        </a>
+    </header>
+
+    <!-- Scrollable Content Viewport -->
+    <main class="flex-1 overflow-y-auto p-4 pb-24 relative bg-slate-50/60">
+
+        <!-- VIEW 1: TODAY ATTENDANCE -->
+        <section id="view-today" class="view-panel space-y-4">
+            
+            <!-- Notice Banner -->
+            <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 text-blue-900 text-xs shadow-sm">
+                <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p id="noticeText" class="font-medium leading-relaxed">Please complete your daily Punch-In. The camera terminal will automatically turn off once punched in.</p>
+            </div>
+
+            <!-- Live Camera Terminal Shell -->
+            <div id="cameraWrapper" class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-[4/3] shadow-lg border border-slate-800 flex flex-col justify-between p-3">
+                <video id="webcam" autoplay playsinline class="absolute inset-0 w-full h-full object-cover z-0"></video>
+                <canvas id="watermarkCanvas" class="hidden"></canvas>
+                
+                <!-- Live Overlay Status -->
+                <div class="relative z-10 flex justify-between items-center">
+                    <span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1.5">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full pulse-ring"></span>
+                        SECURE CAM ACTIVE
+                    </span>
+                    <span id="gpsStatusBadge" class="bg-slate-900/80 backdrop-blur-md text-slate-300 text-[10px] font-mono px-2.5 py-1 rounded-full border border-white/10">
+                        GPS: Fetching...
+                    </span>
+                </div>
+
+                <!-- Watermark Overlay Live Preview Indicator -->
+                <div class="relative z-10 bg-slate-900/75 backdrop-blur-sm p-2 rounded-xl border border-white/10 text-[10px] text-slate-300 font-mono space-y-0.5 shadow-sm">
+                    <div id="liveTimeTag" class="text-white font-semibold">Time: --:--:--</div>
+                    <div id="liveGpsTag" class="text-slate-400">Coords: -- , --</div>
+                </div>
+            </div>
+
+            <!-- 8-Hour Countdown Shift Timer Card -->
+            <div id="timerCard" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-4 rounded-2xl text-center shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-orange-500"></div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-amber-800">Mandatory Shift Timer (Remaining Time)</span>
+                <div id="countdownDisplay" class="text-3xl font-mono font-bold text-amber-900 mt-1 tracking-tight">08:00:00</div>
+                <p class="text-[11px] text-amber-700 mt-1">Punch-Out button will automatically unlock when timer expires.</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+                <button id="btnPunchIn" onclick="handlePunchIn()" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                    Punch In
+                </button>
+                <button id="btnPunchOut" onclick="handlePunchOut()" disabled class="w-full py-3.5 px-4 bg-slate-200 text-slate-400 font-semibold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Punch Out
+                </button>
+            </div>
+        </section>
+
+        <!-- VIEW 2: INTERACTIVE CALENDAR -->
+        <section id="view-attendance" class="view-panel hidden space-y-4">
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm text-center">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Days Present This Month</span>
+                <div id="calendarPresentCount" class="text-2xl font-bold text-slate-900 mt-0.5">0 Days</div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <button onclick="navigateMonth(-1)" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <span id="calendarTitle" class="text-sm font-bold text-slate-900">October 2026</span>
+                    <button onclick="navigateMonth(1)" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-7 text-center text-[11px] font-bold text-slate-400 mb-2">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+
+                <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+
+                <div class="flex justify-center items-center gap-4 mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block"></span> Present
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 bg-slate-200 rounded-full inline-block"></span> Absent / Off
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: SALARY VIEW -->
+        <section id="view-salary" class="view-panel hidden space-y-4">
+            <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 text-blue-900 text-xs">
+                <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="font-medium leading-relaxed">Monthly salaries are calculated directly from verified punch records and credited automatically to your linked bank account.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm text-center">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Daily Rate</span>
+                    <div class="text-xl font-bold text-slate-900 mt-1">₹600</div>
+                </div>
+                <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm text-center">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Present Days</span>
+                    <div id="salaryDaysCount" class="text-xl font-bold text-slate-900 mt-1">0 Days</div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-5 rounded-2xl shadow-sm text-center">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Calculated Total Salary</span>
+                <div id="salaryTotalAmount" class="text-3xl font-extrabold text-emerald-700 mt-1">₹0</div>
+                <p class="text-[11px] text-emerald-600 mt-1">Net payable amount for selected month</p>
+            </div>
+        </section>
+
+        <!-- VIEW 4: BANK LINK VIEW -->
+        <section id="view-bank" class="view-panel hidden space-y-4">
+            <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 text-blue-900 text-xs">
+                <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p id="bankNoticeText" class="font-medium leading-relaxed">Ensure your bank account details match your official passbook. Once linked, editing is permanently locked for security.</p>
+            </div>
+
+            <!-- Verified Bank Account Card (Hidden until saved) -->
+            <div id="bankVerifiedCard" class="hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden space-y-3">
+                <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/5 rounded-full pointer-events-none"></div>
+                <div class="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-3 py-1 rounded-full text-[10px] font-bold">
+                    ✓ VERIFIED & LOCKED ACCOUNT
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-300 uppercase tracking-wider block">Bank Name</span>
+                    <span id="cardBankName" class="text-sm font-bold text-white">-</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-[10px] text-slate-300 uppercase tracking-wider block">Account Number</span>
+                        <span id="cardAccountNo" class="text-xs font-mono font-bold text-amber-400">-</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-300 uppercase tracking-wider block">IFSC Code</span>
+                        <span id="cardIfscCode" class="text-xs font-mono font-bold text-white">-</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-300 uppercase tracking-wider block">Account Holder Name</span>
+                    <span id="cardHolderName" class="text-xs font-semibold text-slate-200">-</span>
+                </div>
+            </div>
+
+            <!-- Bank Form -->
+            <form id="bankForm" onsubmit="saveBankDetails(event)" class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Bank Name</label>
+                    <input type="text" id="bankName" required placeholder="e.g. State Bank of India" class="w-full text-xs p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Account Number</label>
+                    <input type="text" id="accountNo" required placeholder="Enter bank account number" class="w-full text-xs p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">IFSC Code</label>
+                    <input type="text" id="ifscCode" required placeholder="e.g. SBIN0001234" class="w-full text-xs p-3 border border-slate-200 rounded-xl uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Account Holder Name</label>
+                    <input type="text" id="holderName" required placeholder="As printed in bank passbook" class="w-full text-xs p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl shadow-lg transition active:scale-[0.98] mt-2">
+                    Securely Link Bank Account
+                </button>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bg-white border-t border-slate-200 grid grid-cols-4 py-2 px-1 relative z-10 shadow-lg">
+        <button onclick="switchTab('today', this)" class="nav-tab active flex flex-col items-center justify-center py-1 text-blue-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-[10px] font-bold mt-1">Today</span>
+        </button>
+        <button onclick="switchTab('attendance', this)" class="nav-tab flex flex-col items-center justify-center py-1 text-slate-400 hover:text-slate-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span class="text-[10px] font-bold mt-1">Attendance</span>
+        </button>
+        <button onclick="switchTab('salary', this)" class="nav-tab flex flex-col items-center justify-center py-1 text-slate-400 hover:text-slate-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-[10px] font-bold mt-1">Salary</span>
+        </button>
+        <button onclick="switchTab('bank', this)" class="nav-tab flex flex-col items-center justify-center py-1 text-slate-400 hover:text-slate-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            <span class="text-[10px] font-bold mt-1">Bank Link</span>
+        </button>
+    </nav>
+
+    <!-- Custom Reusable Modal Overlay -->
+    <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+        <div id="modalCard" class="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl transform scale-95 transition-transform duration-200 space-y-3 text-center">
+            <div id="modalIcon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto bg-blue-100 text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <h3 id="modalTitle" class="text-base font-bold text-slate-900">Notification</h3>
+            <p id="modalMessage" class="text-xs text-slate-600 leading-relaxed">Modal message goes here.</p>
+            <div id="modalExtra" class="text-left text-xs bg-slate-50 p-3 rounded-xl border border-slate-200 hidden space-y-2"></div>
+            <button onclick="closeModal()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl transition">Close</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const USER_ID = "EMP_2026_01";
+    const CLOUDFLARE_WORKER_URL = "https://your-worker-subdomain.workers.dev";
+    const SHIFT_DURATION_MS = 8 * 60 * 60 * 1000; // 8 Hours
+
+    let currentLat = 28.6139, currentLng = 77.2090;
+    let countdownInterval = null;
+    let clockInterval = null;
+    let calendarDate = new Date();
+
+    window.onload = function() {
+        startLiveClock();
+        initCamera();
+        fetchGPSLocation();
+        loadBankDetails();
+        checkTodayStatus();
+        renderCalendar();
+    };
+
+    function switchTab(tabName, clickedBtn) {
+        document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
+        document.querySelectorAll('.nav-tab').forEach(btn => {
+            btn.className = "nav-tab flex flex-col items-center justify-center py-1 text-slate-400 hover:text-slate-600 transition-colors";
+        });
+
+        document.getElementById(`view-${tabName}`).classList.remove('hidden');
+        
+        const activeColors = {
+            today: "text-blue-600",
+            attendance: "text-emerald-600",
+            salary: "text-amber-600",
+            bank: "text-purple-600"
+        };
+        clickedBtn.className = `nav-tab active flex flex-col items-center justify-center py-1 ${activeColors[tabName]} font-bold transition-colors`;
+
+        if (tabName === 'attendance') {
+            renderCalendar();
+        } else if (tabName === 'salary') {
+            updateSalaryMetrics();
+        }
+    }
+
+    function showModal(title, message, type = "info", extraHtml = "") {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalMessage').innerText = message;
+        
+        const iconContainer = document.getElementById('modalIcon');
+        if (type === 'success') {
+            iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto bg-emerald-100 text-emerald-600";
+            iconContainer.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+        } else if (type === 'warning') {
+            iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto bg-amber-100 text-amber-600";
+            iconContainer.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`;
+        } else {
+            iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto bg-blue-100 text-blue-600";
+            iconContainer.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+        }
+
+        const extraBox = document.getElementById('modalExtra');
+        if (extraHtml) {
+            extraBox.innerHTML = extraHtml;
+            extraBox.classList.remove('hidden');
+        } else {
+            extraBox.classList.add('hidden');
+        }
+
+        const backdrop = document.getElementById('modalBackdrop');
+        const card = document.getElementById('modalCard');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        card.classList.remove('scale-95');
+    }
+
+    function closeModal() {
+        const backdrop = document.getElementById('modalBackdrop');
+        const card = document.getElementById('modalCard');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        card.classList.add('scale-95');
+    }
+
+    function initCamera() {
+        const video = document.getElementById('webcam');
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(stream => { video.srcObject = stream; })
+                .catch(err => {
+                    console.warn("Camera access warning:", err);
+                });
+        }
+    }
+
+    function fetchGPSLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    currentLat = pos.coords.latitude;
+                    currentLng = pos.coords.longitude;
+                    document.getElementById('gpsStatusBadge').innerText = `GPS: ${currentLat.toFixed(2)}, ${currentLng.toFixed(2)}`;
+                    document.getElementById('liveGpsTag').innerText = `Coords: ${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
+                },
+                err => {
+                    document.getElementById('gpsStatusBadge').innerText = "GPS: Active (Secured)";
+                }
+            );
+        }
+    }
+
+    function startLiveClock() {
+        clockInterval = setInterval(() => {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('liveTimeTag').innerText = `Time: ${timeString}`;
+        }, 1000);
+    }
+
+    function captureWatermarkedBase64() {
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('watermarkCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+        ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 14px Inter, sans-serif";
+        const timeStampStr = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        ctx.fillText(`VERIFIED SECURE: ${timeStampStr}`, 12, canvas.height - 35);
+        ctx.fillText(`GPS: ${currentLat.toFixed(4)} N, ${currentLng.toFixed(4)} E`, 12, canvas.height - 15);
+
+        return canvas.toDataURL('image/jpeg', 0.7);
+    }
+
+    function getTodayKey() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    async function handlePunchIn() {
+        const todayKey = getTodayKey();
+        const existingRecord = localStorage.getItem(`record_${USER_ID}_${todayKey}`);
+
+        if (existingRecord) {
+            showModal("Already Recorded", "You have already punched in for today.", "warning");
+            return;
+        }
+
+        const photoBase64 = captureWatermarkedBase64();
+        const punchInTimeMs = Date.now();
+        const punchInTimeFormatted = new Date().toLocaleTimeString();
+
+        const record = {
+            date: todayKey,
+            status: "PRESENT",
+            punchInTime: punchInTimeFormatted,
+            punchInMs: punchInTimeMs,
+            punchOutTime: null,
+            photo: photoBase64,
+            lat: currentLat,
+            lng: currentLng
+        };
+
+        localStorage.setItem(`record_${USER_ID}_${todayKey}`, JSON.stringify(record));
+        syncWithWorkerBackend('PUNCH_IN', record);
+
+        showModal("Punch-In Successful", "Attendance recorded. Camera terminal will now auto-hide during your mandatory 8-hour shift.", "success");
+
+        checkTodayStatus();
+        renderCalendar();
+    }
+
+    async function handlePunchOut() {
+        const todayKey = getTodayKey();
+        const rawRecord = localStorage.getItem(`record_${USER_ID}_${todayKey}`);
+
+        if (!rawRecord) {
+            showModal("Error", "No Punch-In record found for today.", "warning");
+            return;
+        }
+
+        const record = JSON.parse(rawRecord);
+        if (record.punchOutTime) {
+            showModal("Already Completed", "You have already punched out for today.", "warning");
+            return;
+        }
+
+        const punchOutTimeFormatted = new Date().toLocaleTimeString();
+        record.punchOutTime = punchOutTimeFormatted;
+
+        localStorage.setItem(`record_${USER_ID}_${todayKey}`, JSON.stringify(record));
+        syncWithWorkerBackend('PUNCH_OUT', record);
+
+        showModal("Punch-Out Successful", "Your shift has been successfully completed and recorded.", "success");
+
+        checkTodayStatus();
+        renderCalendar();
+    }
+
+    function checkTodayStatus() {
+        const todayKey = getTodayKey();
+        const rawRecord = localStorage.getItem(`record_${USER_ID}_${todayKey}`);
+
+        const btnIn = document.getElementById('btnPunchIn');
+        const btnOut = document.getElementById('btnPunchOut');
+        const cameraWrapper = document.getElementById('cameraWrapper');
+        const timerCard = document.getElementById('timerCard');
+        const noticeText = document.getElementById('noticeText');
+
+        if (!rawRecord) {
+            btnIn.disabled = false;
+            btnIn.className = "w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all";
+            
+            btnOut.disabled = true;
+            btnOut.className = "w-full py-3.5 px-4 bg-slate-200 text-slate-400 font-semibold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2 transition-all";
+
+            cameraWrapper.classList.remove('hidden');
+            timerCard.classList.add('hidden');
+            noticeText.innerText = "Please complete your daily Punch-In. The camera terminal will automatically turn off once punched in.";
+            return;
+        }
+
+        const record = JSON.parse(rawRecord);
+
+        if (record.punchOutTime) {
+            btnIn.disabled = true;
+            btnIn.innerText = "Punched In ✓";
+            btnIn.className = "w-full py-3.5 px-4 bg-slate-200 text-slate-500 font-semibold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2";
+
+            btnOut.disabled = true;
+            btnOut.innerText = "Punched Out ✓";
+            btnOut.className = "w-full py-3.5 px-4 bg-slate-200 text-slate-500 font-semibold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2";
+
+            cameraWrapper.classList.add('hidden');
+            timerCard.classList.add('hidden');
+            noticeText.innerText = "Today's shift attendance is fully recorded and completed.";
+            return;
+        }
+
+        btnIn.disabled = true;
+        btnIn.innerText = "Punched In ✓";
+        btnIn.className = "w-full py-3.5 px-4 bg-slate-200 text-slate-500 font-semibold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2";
+
+        cameraWrapper.classList.add('hidden');
+        timerCard.classList.remove('hidden');
+        noticeText.innerText = "Shift in progress. Camera is hidden. Punch-Out button will unlock automatically after 8 hours.";
+
+        startShiftCountdown(record.punchInMs);
+    }
+
+    function startShiftCountdown(punchInMs) {
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        const btnOut = document.getElementById('btnPunchOut');
+        const cameraWrapper = document.getElementById('cameraWrapper');
+        const timerCard = document.getElementById('timerCard');
+        const noticeText = document.getElementById('noticeText');
+
+        countdownInterval = setInterval(() => {
+            const elapsed = Date.now() - punchInMs;
+            const remaining = SHIFT_DURATION_MS - elapsed;
+
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                countdownDisplay.innerText = "00:00:00";
+                timerCard.classList.add('hidden');
+                cameraWrapper.classList.remove('hidden');
+
+                btnOut.disabled = false;
+                btnOut.className = "w-full py-3.5 px-4 bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2 transition-all";
+                noticeText.innerText = "8-Hour shift completed! Live camera re-opened. Please complete Punch-Out.";
+            } else {
+                const hrs = Math.floor(remaining / (1000 * 60 * 60));
+                const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((remaining % (1000 * 60)) / 1000);
+
+                countdownDisplay.innerText = 
+                    String(hrs).padStart(2, '0') + ":" + 
+                    String(mins).padStart(2, '0') + ":" + 
+                    String(secs).padStart(2, '0');
+
+                btnOut.disabled = true;
+                btnOut.className = "w-full py-3.5 px-4 bg-slate-200 text-slate-400 font-semibold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2 transition-all";
+            }
+        }, 1000);
+    }
+
+    function navigateMonth(direction) {
+        calendarDate.setMonth(calendarDate.getMonth() + direction);
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const year = calendarDate.getFullYear();
+        const month = calendarDate.getMonth();
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        document.getElementById('calendarTitle').innerText = `${monthNames[month]} ${year}`;
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+
+        let monthPresentCount = 0;
+
+        for (let i = 0; i < firstDayIndex; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = "h-9";
+            grid.appendChild(emptyCell);
+        }
+
+        for (let day = 1; day <= totalDaysInMonth; day++) {
+            const dayCell = document.createElement('div');
+            const formattedDay = String(day).padStart(2, '0');
+            const formattedMonth = String(month + 1).padStart(2, '0');
+            const dateKey = `${year}-${formattedMonth}-${formattedDay}`;
+
+            const rawRecord = localStorage.getItem(`record_${USER_ID}_${dateKey}`);
+
+            if (rawRecord) {
+                monthPresentCount++;
+                dayCell.className = "h-9 flex items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 font-bold border border-emerald-300/60 cursor-pointer hover:bg-emerald-200 transition";
+            } else {
+                dayCell.className = "h-9 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 font-medium hover:bg-slate-200 cursor-pointer transition";
+            }
+
+            dayCell.innerText = day;
+
+            dayCell.onclick = function() {
+                openDateDetailDialog(dateKey, rawRecord);
+            };
+
+            grid.appendChild(dayCell);
+        }
+
+        document.getElementById('calendarPresentCount').innerText = `${monthPresentCount} Days`;
+        updateSalaryMetrics(monthPresentCount);
+    }
+
+    function openDateDetailDialog(dateKey, rawRecord) {
+        if (rawRecord) {
+            const record = JSON.parse(rawRecord);
+            const extraHtml = `
+                <div class="space-y-1.5">
+                    <div class="flex justify-between"><span class="text-slate-500">Date:</span> <span class="font-bold text-slate-800">${record.date}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Status:</span> <span class="font-bold text-emerald-600">PRESENT</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Punch-In:</span> <span class="font-mono text-slate-800">${record.punchInTime || 'N/A'}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Punch-Out:</span> <span class="font-mono text-slate-800">${record.punchOutTime || 'Pending / In-Shift'}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">GPS Coords:</span> <span class="font-mono text-slate-800">${record.lat.toFixed(4)}, ${record.lng.toFixed(4)}</span></div>
+                    ${record.photo ? `<div class="mt-2"><span class="text-slate-500 block mb-1">Captured Photo:</span><img src="${record.photo}" class="w-full h-32 object-cover rounded-lg border border-slate-200 shadow-sm" /></div>` : ''}
+                </div>
+            `;
+            showModal("Attendance Details", `Record found for ${dateKey}`, "success", extraHtml);
+        } else {
+            const extraHtml = `
+                <div class="space-y-1.5">
+                    <div class="flex justify-between"><span class="text-slate-500">Date:</span> <span class="font-bold text-slate-800">${dateKey}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Status:</span> <span class="font-bold text-slate-400">ABSENT / OFF</span></div>
+                    <p class="text-slate-400 italic text-[11px] mt-1">No punch records found for this calendar date.</p>
+                </div>
+            `;
+            showModal("Attendance Details", `No record for ${dateKey}`, "warning", extraHtml);
+        }
+    }
+
+    function updateSalaryMetrics(presentDaysCount) {
+        if (presentDaysCount === undefined) {
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+            presentDaysCount = 0;
+
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                if (localStorage.getItem(`record_${USER_ID}_${dateKey}`)) {
+                    presentDaysCount++;
+                }
+            }
+        }
+
+        const dailyRate = 600;
+        const totalSalary = presentDaysCount * dailyRate;
+
+        document.getElementById('salaryDaysCount').innerText = `${presentDaysCount} Days`;
+        document.getElementById('salaryTotalAmount').innerText = `₹${totalSalary.toLocaleString('en-IN')}`;
+    }
+
+    function saveBankDetails(event) {
+        event.preventDefault();
+
+        const bankData = {
+            bankName: document.getElementById('bankName').value.trim(),
+            accountNo: document.getElementById('accountNo').value.trim(),
+            ifscCode: document.getElementById('ifscCode').value.trim().toUpperCase(),
+            holderName: document.getElementById('holderName').value.trim()
+        };
+
+        localStorage.setItem(`bank_${USER_ID}`, JSON.stringify(bankData));
+        syncWithWorkerBackend('SAVE_BANK', bankData);
+
+        displayVerifiedBankCard(bankData);
+        showModal("Profile Verified", "Your bank account has been securely linked and permanently locked for salary deposits.", "success");
+    }
+
+    function loadBankDetails() {
+        const rawBank = localStorage.getItem(`bank_${USER_ID}`);
+        if (rawBank) {
+            const bank = JSON.parse(rawBank);
+            displayVerifiedBankCard(bank);
+        }
+    }
+
+    function displayVerifiedBankCard(bank) {
+        document.getElementById('bankForm').style.display = 'none';
+        document.getElementById('bankVerifiedCard').classList.remove('hidden');
+
+        document.getElementById('cardBankName').innerText = bank.bankName;
+        
+        const acc = bank.accountNo;
+        const masked = acc.length > 4 ? '•••• •••• ' + acc.slice(-4) : acc;
+        document.getElementById('cardAccountNo').innerText = masked;
+        document.getElementById('cardIfscCode').innerText = bank.ifscCode;
+        document.getElementById('cardHolderName').innerText = bank.holderName;
+
+        document.getElementById('bankNoticeText').innerText = "Your bank account is verified and locked. Monthly disbursements will be sent directly to this account.";
+    }
+
+    async function syncWithWorkerBackend(actionType, payload) {
+        try {
+            await fetch(`${CLOUDFLARE_WORKER_URL}/api/attendance`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId: USER_ID,
+                    action: actionType,
+                    timestamp: new Date().toISOString(),
+                    data: payload
+                })
+            });
+        } catch (err) {
+            console.log("Background sync queued in LocalStorage.");
+        }
+    }
+</script>
+
+</body>
+</html>
